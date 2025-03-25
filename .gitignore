@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*/settings.py
+*/urls.py
+
+# Django
+*.log
+*.pot
+
+# Sensitive settings (if you have local settings)
+dofustock_project/settings_local.py
+
+# Database
+*.sqlite3
+db.sqlite3
+
+# Virtual environment
+venv/
+.env
+env/
+
+# VS Code
+.vscode/
+
+# Specific sensitive files (if any)
+# secret_key.txt
+
+# Ignore migration files (optional)
+**/migrations/**
+!**/migrations/__init__.py
