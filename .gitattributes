@@ -1,0 +1,6 @@
+# Ensure all files use LF line endings
+* text=auto
+*.html text eol=lf
+*.py text eol=lf
+*.css text eol=lf
+*.js text eol=lf

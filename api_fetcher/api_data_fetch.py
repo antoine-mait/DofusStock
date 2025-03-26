@@ -150,14 +150,14 @@ class DofusItemFetcher:
                 ascii_filename = normalized.encode('ascii', 'ignore').decode('ascii')
                 
                 # Remove invalid characters and replace spaces with underscores
-                sanitized = re.sub(r'[<>:"/\\|?*]', '', ascii_filename).replace(' ', '_')
+                sanitized = re.sub(r'[<>:"/\\|?*\']', '', ascii_filename).replace(' ', '_')
                 
                 return sanitized
 
             # Determine base media directory
             base_media_dir = os.path.join(
                 os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
-                'dofustock_project', 'media', 'IMG'
+                'dofustock_site', 'media', 'IMG'
             )
 
             # Create base media directory if it doesn't exist
@@ -300,11 +300,9 @@ def api_to_sqlite():
     try:
         # Get the parent directory of the current script's directory
         parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        logger.info(f"Parent directory: {parent_dir}")
         
         # Create database path in the parent directory
         db_path = os.path.join(parent_dir, 'dofus_items.sqlite3')
-        logger.info(f"Database path: {db_path}")
 
         # Initialize the fetcher with a specific database path
         fetcher = DofusItemFetcher(base_url, db_path)
@@ -330,8 +328,6 @@ def api_to_sqlite():
             else:
                 continue
 
-            logger.info(f"Item types for {categorie}: {types}")
-
             # Multithreaded fetching and inserting
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 futures = [
@@ -354,7 +350,6 @@ def api_to_sqlite():
 
 def fetch_and_insert(categorie, item_type, level_min, level_max, fetcher):
     """Helper function for fetching and inserting items"""
-    logger.info(f"Fetching and inserting {categorie} - {item_type}")
     items = fetcher.get_item(categorie, item_type, level_min, level_max)
     if items:
         fetcher.insert_item_to_database(categorie, items, item_type)

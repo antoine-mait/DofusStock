@@ -30,3 +30,6 @@ env/
 # Ignore migration files (optional)
 **/migrations/**
 !**/migrations/__init__.py
+
+*media/
+*.json
