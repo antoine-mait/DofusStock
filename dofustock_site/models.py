@@ -23,10 +23,6 @@ class Item(models.Model):
         db_table = 'items' 
         app_label = 'dofustock_site'
 
-    def save(self, *args, **kwargs):
-        kwargs['using'] = 'dofus_items'
-        return super().save(*args, **kwargs)
-
     @classmethod
     def objects(cls):
         return super().objects.using('dofus_items')
@@ -39,10 +35,6 @@ class Effect(models.Model):
         managed = False
         db_table = 'effects'
         app_label = 'dofustock_site'
-
-    def save(self, *args, **kwargs):
-        kwargs['using'] = 'dofus_items'
-        return super().save(*args, **kwargs)
 
     @classmethod
     def objects(cls):
@@ -58,10 +50,6 @@ class Recipe(models.Model):
         managed = False
         db_table = 'recipes'
         app_label = 'dofustock_site'
-
-    def save(self, *args, **kwargs):
-        kwargs['using'] = 'dofus_items'
-        return super().save(*args, **kwargs)
 
     @classmethod
     def objects(cls):

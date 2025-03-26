@@ -1,0 +1,26 @@
+/* Styling for the post list */
+.item-list {
+    list-style-type: none;
+    padding: 0;
+    display: inline-flex;
+}
+
+/* Styling for individual posts */
+.item {
+
+    gap: 10px;
+    padding: 10px;
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    background-color: white;
+    margin: 5px;
+}
+
+/* Additional styling for post content */
+.item-head{
+    display: flex;
+    gap:10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+

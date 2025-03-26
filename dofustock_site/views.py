@@ -6,7 +6,7 @@ from django.shortcuts import render , redirect , get_object_or_404
 from django.urls import reverse
 from django.contrib import messages
 from django.conf import settings
-from .models import User
+from .models import User , Item
 # Create your views here.
 def index(request):
 
@@ -61,3 +61,13 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "dofustock/register.html")
+
+def encyclopedie(request):
+
+    all_items = Item.objects.all()
+    categories = Item.objects.values_list('category', flat = True).distinct()
+    return render(request, "dofustock/encyclopedie.html",{
+        "items" : all_items,
+        "categories" : categories,
+
+    })

@@ -1,0 +1,17 @@
+{% extends "dofustock/layout.html" %}
+
+{% block body %}
+
+<h1>Encyclopedie</h1>
+
+{% for category in categories %}
+    <ul class="item-list">
+        <li class="item">
+            <div class="item-head">
+                <p>{{ category }}</p>
+            </div>
+        </li>
+    </ul>
+{% endfor %}
+
+{% endblock %}
