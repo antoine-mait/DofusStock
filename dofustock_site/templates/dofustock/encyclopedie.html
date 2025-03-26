@@ -2,16 +2,36 @@
 
 {% block body %}
 
-<h1>Encyclopedie</h1>
+<div class="encyclopedia-container">
+    <h1 class="title">Encyclopedie</h1>
+    
+    <div class="category-buttons">
+        {% for category in categories %}
+            <button 
+                class="category-button" 
+                data-category="{{ category }}"
+            >
+                {{ category }}
+            </button>
+        {% endfor %}
+    </div>
+    <div class="search-container">
+        <input 
+            type="text" 
+            id="item-search" 
+            placeholder="Search items..."
+            aria-label="Search items"
+        >
+    </div>
 
-{% for category in categories %}
-    <ul class="item-list">
-        <li class="item">
-            <div class="item-head">
-                <p>{{ category }}</p>
-            </div>
-        </li>
-    </ul>
-{% endfor %}
+    <div id="item-type-container" class="item-type-buttons">
+        <!-- Item type buttons will be dynamically added here -->
+    </div>
+
+    <div id="item-container" class="item-grid">
+        <!-- Items will be dynamically added here -->
+    </div>
+</div>
+
 
 {% endblock %}

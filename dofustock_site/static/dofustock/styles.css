@@ -1,26 +1,71 @@
-/* Styling for the post list */
-.item-list {
-    list-style-type: none;
-    padding: 0;
-    display: inline-flex;
+.encyclopedia-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
-/* Styling for individual posts */
-.item {
-
-    gap: 10px;
-    padding: 10px;
-    border: 2px solid rgba(0, 0, 0, 0.3);
-    border-radius: 15px;
-    background-color: white;
-    margin: 5px;
-}
-
-/* Additional styling for post content */
-.item-head{
+.category-buttons, 
+.item-type-buttons,
+.title {
     display: flex;
-    gap:10px;
-    align-items: center;
     flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+    justify-content: center;
 }
 
+.category-button, 
+.item-type-button {
+    padding: 10px 15px;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.category-button:hover, 
+.item-type-button:hover {
+    background-color: #e0e0e0;
+}
+
+.item-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.item-card {
+    border: 1px solid #ddd;
+    padding: 15px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%; /* Ensure cards have consistent height */
+}
+
+.item-card img {
+    max-width: 150px;  /* Fixed max width */
+    max-height: 150px; /* Fixed max height */
+    object-fit: contain; /* Preserve aspect ratio */
+    margin: 10px 0;
+    display: block; /* Ensure image is a block element */
+}
+
+.search-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+#item-search {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+}

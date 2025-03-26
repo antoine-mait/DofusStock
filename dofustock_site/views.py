@@ -6,7 +6,10 @@ from django.shortcuts import render , redirect , get_object_or_404
 from django.urls import reverse
 from django.contrib import messages
 from django.conf import settings
+from django.http import JsonResponse
 from .models import User , Item
+import os
+
 # Create your views here.
 def index(request):
 
@@ -71,3 +74,38 @@ def encyclopedie(request):
         "categories" : categories,
 
     })
+
+def get_item_types(request):
+    category = request.GET.get('category')
+    
+    # Fetch unique item types for the selected category
+    item_types = Item.objects.filter(category=category)\
+        .values_list('item_type', flat=True)\
+        .distinct()
+    
+    return JsonResponse(list(item_types), safe=False)
+
+def get_items(request):
+    category = request.GET.get('category')
+    item_type = request.GET.get('item_type')
+    
+    # Filter items based on category and item type
+    items = Item.objects.filter(
+        category=category, 
+        item_type=item_type
+    ).values()
+    
+    return JsonResponse(list(items), safe=False)
+
+def search_items(request):
+    search_term = request.GET.get('search', '').strip()
+    
+    if not search_term:
+        return JsonResponse([], safe=False)
+    
+    # Perform a case-insensitive search across all items
+    items = Item.objects.filter(
+        name__icontains=search_term
+    ).values()
+    
+    return JsonResponse(list(items), safe=False)
