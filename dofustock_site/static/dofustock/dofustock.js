@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p>Level: ${item.level}</p>
                     ${priceSection}
                     <img 
-                        src="${imagePath}" 
+                        src="${imagePath} " 
                         alt="${item.name}"
                         onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;"
                     >
