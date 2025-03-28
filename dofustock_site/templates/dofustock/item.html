@@ -1,0 +1,80 @@
+{% extends "dofustock/layout.html" %}
+
+{% block body %}
+<div class="item-detail-container">
+    <div class="item-header">
+        <div class="item-header-content">
+            <h1>{{ item.name }}</h1>
+            
+            <div class="item-metadata">
+                <p><strong><u>Level</u></strong>: {{ item.level }}</p>
+                <p><strong><u>Category</u></strong>: {{ item.category }}</p>
+                <p><strong><u>Type</u></strong>: {{ item.item_type }}</p>
+            </div>
+        </div>
+        <p><strong>Price</strong>: {{ item.price }}</p>
+    </div>
+
+    <div class="item-details-header">
+        <div class="item-image">
+            <img 
+                src="/media/IMG/{{ item.category }}/{{ item.item_type }}/{{ item.ankama_id }}-{{ item.sanitized_name }}.png" 
+                alt="{{ item.name }}"
+                onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;"
+            >
+        </div>
+
+        {% if item.description %}
+        <div class="item-description">
+            <h2>Description</h2>
+            <p>{{ item.description }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="item-details-row">
+        {% if recipes %}
+        <div class="item-recipes">
+            <h2>Crafting Recipe</h2>
+            <p><strong>Craft price</strong>: {{ item.price }}</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="recipe-image"></th>
+                        <th class="recipe-quantity">Quantity</th>
+                        <th class="recipe-name">Resource</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for recipe in recipes %}
+                    <tr>
+                        <td>
+                            <img 
+                                src="{{ recipe.resource_image }}" 
+                                alt="{{ recipe.resource_name }}"
+                                style="max-width: 50px; max-height: 50px; object-fit: contain;"
+                                onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;"
+                            >
+                        </td>
+                        <td>{{ recipe.quantity }}</td>
+                        <td>{{ recipe.resource_name }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if effects %}
+        <div class="item-effects">
+            <h2>Effects</h2>
+            <ul>
+                {% for effect in effects %}
+                <li>{{ effect.description }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

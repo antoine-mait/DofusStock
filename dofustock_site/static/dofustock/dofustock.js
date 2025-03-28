@@ -26,7 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Display search results
             items.forEach(item => {
-                const itemElement = document.createElement('div');
+                const itemElement = document.createElement('a');
+                itemElement.href = `/item/${item.ankama_id}/`;
                 itemElement.classList.add('item-card');
                 
                 // Attempt to construct image path
@@ -56,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return filename
             .normalize('NFD')  // Normalize Unicode characters
             .replace(/[\u0300-\u036f]/g, '') // Remove accent marks
-            .replace(/[<>:"/\\|?*'°]/g, '')   // Remove invalid characters
+            .replace(/[<>:"/\\|?*'°œ]/g, '')   // Remove invalid characters
             .replace(/\s+/g, '_');           // Replace spaces with underscores
     }
 
@@ -113,7 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Create item elements
             items.forEach(item => {
-                const itemElement = document.createElement('div');
+                const itemElement = document.createElement('a');
+                itemElement.href = `/item/${item.ankama_id}/`;
                 itemElement.classList.add('item-card');
                 
                 const imagePath = `/media/IMG/${category}/${itemType}/${item.ankama_id}-${sanitizeFilename(item.name)}.png`;

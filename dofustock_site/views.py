@@ -8,8 +8,8 @@ from django.contrib import messages
 from django.conf import settings
 from django.http import JsonResponse
 from .models import User , Item
-import os
 
+from .utils import sanitize_filename
 # Create your views here.
 def index(request):
 
@@ -109,3 +109,52 @@ def search_items(request):
     ).values()
     
     return JsonResponse(list(items), safe=False)
+
+def get_items_recipe(request, ankama_id):
+    try:
+        # Use the path parameter directly
+        item = Item.objects.get(ankama_id=ankama_id)
+        
+        effects = list(item.effects.values())
+        recipes = list(item.recipes.values())
+        
+        # Combine item data with related data
+        item_data = item.__dict__
+        item_data.pop('_state', None)  
+        item_data['effects'] = effects
+        item_data['recipes'] = recipes
+        
+        return JsonResponse(item_data)
+    except Item.DoesNotExist:
+        return JsonResponse({'error': 'Item not found'}, status=404)
+    
+def item_detail(request, ankama_id):
+    try:
+        item = Item.objects.get(ankama_id=ankama_id)
+        
+        # Sanitize filename
+        item.sanitized_name = sanitize_filename(item.name)
+        
+        # Fetch recipes with full resource details
+        recipes = []
+        for recipe in item.recipes.all():
+            recipe_dict = recipe.__dict__
+            
+            # Try to find the resource item
+            try:
+                resource_item = Item.objects.get(ankama_id=recipe.resource_id)
+                recipe_dict['resource_image'] = f"/media/IMG/{resource_item.category}/{resource_item.item_type}/{resource_item.ankama_id}-{sanitize_filename(resource_item.name)}.png"
+            except Item.DoesNotExist:
+                recipe_dict['resource_image'] = '/media/IMG/equipment/Outil/489-Loupe.png'
+            
+            recipes.append(recipe_dict)
+        
+        effects = list(item.effects.values())
+        
+        return render(request, "dofustock/item.html", {
+            'item': item,
+            'effects': effects,
+            'recipes': recipes,
+        })
+    except Item.DoesNotExist:
+        return HttpResponseRedirect(reverse("encyclopedie"))
