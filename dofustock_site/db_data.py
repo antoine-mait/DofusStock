@@ -1,7 +1,11 @@
+import time
 from playwright.sync_api import sync_playwright
 import json
 
 def scrape_dofus_build_items(url):
+    # # Start the timer
+    # start_time = time.time()
+    
     try:
         # Define excluded items
         exclude_items = [
@@ -41,6 +45,11 @@ def scrape_dofus_build_items(url):
             }''' % json.dumps(exclude_items))
             
             browser.close()
+            
+            # Calculate and print execution time
+            # end_time = time.time()
+            # print(f"Execution time: {end_time - start_time:.2f} seconds")
+            
             return build_items
     
     except Exception as e:
@@ -50,6 +59,7 @@ def scrape_dofus_build_items(url):
 def main():
     url = 'https://d-bk.net/fr/d/1K4FD'
     build_items = scrape_dofus_build_items(url)
+    print("Build Items:")
     for item in build_items:
         print(item)
 
