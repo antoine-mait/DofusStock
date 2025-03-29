@@ -21,7 +21,7 @@
               <ul class="navbar-nav mr-auto">
                 {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'user_profile' user.username %}">
+                        <a class="nav-link">
                             <strong>{{ user.username }}</strong>
                         </a>
                     </li>
