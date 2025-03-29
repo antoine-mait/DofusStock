@@ -1,0 +1,42 @@
+{% extends "dofustock/layout.html" %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2>Craft List Generator</h2>
+        </div>
+        <div class="card-body">
+            <p class="card-text">Enter a Dofus Build URL (https://d-bk.net/fr/d/...) to extract items:</p>
+            
+            <form id="url-form" class="mb-4">
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="build-url" 
+                        class="form-control"
+                        placeholder="https://d-bk.net/fr/d/..."
+                        aria-label="Dofus Build URL"
+                    >
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="submit">Extract Items</button>
+                    </div>
+                </div>
+            </form>
+            
+            <div id="loading" class="text-center d-none">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <p class="mt-2">Extracting items from the build...</p>
+            </div>
+            
+            <div id="results" class="mt-4">
+                <h3 class="d-none" id="results-title">Items Found:</h3>
+                <div id="items-list"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
