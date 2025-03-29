@@ -18,39 +18,13 @@ class Item(models.Model):
     image_url = models.CharField(max_length=255, blank=True)
     is_weapon = models.BooleanField(default=False)
 
-    class Meta:
-        managed = False  
-        db_table = 'items' 
-        app_label = 'dofustock_site'
-
-    @classmethod
-    def objects(cls):
-        return super().objects.using('dofus_items')
-
 class Effect(models.Model):
-    item = models.ForeignKey(Item, related_name='effects', on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, related_name='effects', on_delete=models.CASCADE, default=1)
     description = models.TextField()
 
-    class Meta:
-        managed = False
-        db_table = 'effects'
-        app_label = 'dofustock_site'
-
-    @classmethod
-    def objects(cls):
-        return super().objects.using('dofus_items')
 
 class Recipe(models.Model):
-    item = models.ForeignKey(Item, related_name='recipes', on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, related_name='recipes', on_delete=models.CASCADE, default=1)  # Assuming ID 1 exists
     resource_id = models.IntegerField()
     resource_name = models.CharField(max_length=255)
     quantity = models.IntegerField()
-
-    class Meta:
-        managed = False
-        db_table = 'recipes'
-        app_label = 'dofustock_site'
-
-    @classmethod
-    def objects(cls):
-        return super().objects.using('dofus_items')

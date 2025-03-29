@@ -2,7 +2,6 @@ import os
 import re
 import sys
 import time
-import sqlite3
 import logging
 import requests
 import unicodedata
@@ -10,6 +9,16 @@ import concurrent.futures
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from dotenv import load_dotenv
+
+# Django setup
+import django
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dofustock_project.settings')
+django.setup()
+
+# Import your models
+from dofustock_site.models import Item, Effect, Recipe
 
 # Configure logging
 logging.basicConfig(
@@ -27,9 +36,8 @@ load_dotenv()
 DOFUS_API = os.environ.get("DOFUS_API")
 
 class DofusItemFetcher:
-    def __init__(self, base_url, db_path):
+    def __init__(self, base_url):
         logger.info(f"Initializing DofusItemFetcher with base URL: {base_url}")
-        logger.info(f"Database path: {db_path}")
 
         # API Session Setup
         self.base_url = base_url
@@ -46,60 +54,6 @@ class DofusItemFetcher:
         self.session.mount("http://", adapter)
         self.session.mount("https://", adapter)
 
-        # Database Setup
-        self.db_path = db_path
-        self.create_tables()
-
-    def create_tables(self):
-        """Create database tables if they don't exist"""
-        logger.info("Creating database tables if they don't exist")
-        try:
-            with sqlite3.connect(self.db_path) as conn:
-                cursor = conn.cursor()
-                
-                # Items table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS items (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        ankama_id INTEGER UNIQUE,
-                        name TEXT,
-                        category TEXT,
-                        item_type TEXT,
-                        level INTEGER,
-                        description TEXT,
-                        image_url TEXT,
-                        is_weapon BOOLEAN
-                    )
-                ''')
-
-                # Effects table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS effects (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        item_id INTEGER,
-                        description TEXT,
-                        FOREIGN KEY(item_id) REFERENCES items(id)
-                    )
-                ''')
-
-                # Recipes table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS recipes (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        item_id INTEGER,
-                        resource_id INTEGER,
-                        resource_name TEXT,
-                        quantity INTEGER,
-                        FOREIGN KEY(item_id) REFERENCES items(id)
-                    )
-                ''')
-                
-                conn.commit()
-                logger.info("Database tables created successfully")
-        except sqlite3.Error as e:
-            logger.error(f"Error creating database tables: {e}")
-            raise
-
     def get_item(self, categorie, item_type, level_min, level_max):
         """Fetch items from Dofus API"""
         logger.info(f"Fetching items for category: {categorie}, type: {item_type}, levels: {level_min}-{level_max}")
@@ -109,7 +63,7 @@ class DofusItemFetcher:
             "filter[min_level]": level_min,
             "filter[max_level]": level_max,
         }   
-        if categorie in ["equipment", "mounts"]:
+        if categorie in ["equipment"]:
             params["filter[type_enum]"] = item_type
         
         url = (f"{self.base_url}/dofus3/v1/fr/{categorie}/all" 
@@ -124,7 +78,12 @@ class DofusItemFetcher:
             response.raise_for_status()
             
             if categorie == "mounts":
-                items = response.json().get("mounts", [])
+                all_mounts = response.json().get("mounts", [])
+                # Filter mounts by family name if a specific type was requested
+                if item_type in ["Dragodinde", "Muldo", "Volkorne"]:
+                    items = [mount for mount in all_mounts if mount.get('family', {}).get('name') == item_type]
+                else:
+                    items = all_mounts
             else: 
                 items = response.json().get("items", [])
             
@@ -165,7 +124,7 @@ class DofusItemFetcher:
 
             # Determine item type
             item_type = (item['type']['name'] if categorie != 'mounts' 
-                        else item.get('family_name', 'unknown'))
+                        else item.get('family', {}).get('name', 'unknown'))
 
             # Create category and type folders
             category_folder = os.path.join(base_media_dir, categorie)
@@ -182,7 +141,9 @@ class DofusItemFetcher:
             # Skip if image already exists
             if os.path.exists(image_path):
                 logger.info(f"Image for {item['name']} already exists.")
-                return image_path
+                # Return relative path for database storage
+                relative_path = os.path.join('IMG', categorie, item_type, image_name)
+                return relative_path
 
             # Download the image
             logger.info(f"Downloading image from {image_url}")
@@ -192,7 +153,9 @@ class DofusItemFetcher:
                     for chunk in response.iter_content(1024):
                         f.write(chunk)
                 logger.info(f"Image for {item['name']} saved at {image_path}")
-                return image_path
+                # Return relative path for database storage
+                relative_path = os.path.join('IMG', categorie, item_type, image_name)
+                return relative_path
             else:
                 logger.error(f"Failed to download image for {item['name']} (Status: {response.status_code})")
                 return None
@@ -202,93 +165,86 @@ class DofusItemFetcher:
             return None
 
     def insert_item_to_database(self, categorie, items, item_type):
-        """Insert items into the SQLite database"""
+        """Insert items into Django database"""
         if not items:
             logger.warning(f"No items found for {categorie} type '{item_type}'. Skipping...")
             return
 
         logger.info(f"Inserting {len(items)} items for {categorie} - {item_type}")
         
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
+        for item in items:
+            try:
+                # Download image and get the image path
+                image_path = self.download_image(item, categorie)
+                image_url = item['image_urls']['sd'] if image_path is None else image_path
 
-            for item in items:
-                try:
-                    # Download image and get the image path
-                    image_path = self.download_image(item, categorie)
-                    image_url = item['image_urls']['sd'] if image_path is None else image_path
-
-                    # Insert Item
-                    cursor.execute('''
-                        INSERT OR REPLACE INTO items 
-                        (ankama_id, name, category, item_type, level, description, image_url, is_weapon) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                    ''', (
-                        item['ankama_id'],
-                        item['name'],
-                        categorie,
-                        item['type']['name'] if categorie != 'mounts' else item['family_name'],
-                        item.get('level', 0),
-                        item.get('description', ''),
-                        image_url,
-                        item.get('is_weapon', False) if categorie != 'mounts' else False
-                    ))
+                # Insert or update item using Django's ORM
+                item_obj, created = Item.objects.update_or_create(
+                    ankama_id=item['ankama_id'],
+                    defaults={
+                        'name': item['name'],
+                        'category': categorie,
+                        'item_type': item['type']['name'] if categorie != 'mounts' else item.get('family', {}).get('name', ''),
+                        'level': item.get('level', 0),
+                        'description': item.get('description', ''),
+                        'image_url': image_url,
+                        'is_weapon': item.get('is_weapon', False) if categorie != 'mounts' else False
+                    }
+                )
+                
+                # Insert Effects - first delete existing ones
+                if 'effects' in item and item['effects']:
+                    # Delete existing effects for this item
+                    Effect.objects.filter(item=item_obj).delete()
                     
-                    # Get the ID of the inserted/updated item
-                    item_db_id = cursor.lastrowid
+                    # Create new effects
+                    effects_to_create = [
+                        Effect(
+                            item=item_obj,
+                            description=effect['formatted']
+                        )
+                        for effect in item['effects']
+                    ]
+                    Effect.objects.bulk_create(effects_to_create)
+                    logger.info(f"Inserted {len(effects_to_create)} effects for {item['name']}")
+
+                # Insert Recipes - first delete existing ones
+                if categorie != 'mounts' and 'recipe' in item and item['recipe']:
+                    # Delete existing recipes for this item
+                    Recipe.objects.filter(item=item_obj).delete()
                     
-                    # Insert Effects
-                    if 'effects' in item and item['effects']:
-                        effects_data = [
-                            (item_db_id, effect['formatted']) 
-                            for effect in item['effects']
-                        ]
-                        cursor.executemany('''
-                            INSERT INTO effects (item_id, description) 
-                            VALUES (?, ?)
-                        ''', effects_data)
-                        logger.info(f"Inserted {len(effects_data)} effects for {item['name']}")
+                    # Create new recipes
+                    recipes_to_create = []
+                    for recipe in item['recipe']:
+                        resource_name = ''
+                        try:
+                            # Try to find the resource name from existing items
+                            resource = Item.objects.filter(ankama_id=recipe['item_ankama_id']).first()
+                            if resource:
+                                resource_name = resource.name
+                        except Exception:
+                            pass
+                            
+                        recipes_to_create.append(
+                            Recipe(
+                                item=item_obj,
+                                resource_id=recipe['item_ankama_id'],
+                                resource_name=resource_name,
+                                quantity=recipe['quantity']
+                            )
+                        )
+                    
+                    Recipe.objects.bulk_create(recipes_to_create)
+                    logger.info(f"Inserted {len(recipes_to_create)} recipe items for {item['name']}")
 
-                    # Insert Recipes
-                    if categorie != 'mounts' and 'recipe' in item and item['recipe']:
-                        recipes_data = [
-                            (
-                                item_db_id, 
-                                recipe['item_ankama_id'], 
-                                self.find_resource_name(recipe['item_ankama_id'], conn) or '',
-                                recipe['quantity']
-                            ) 
-                            for recipe in item['recipe']
-                        ]
-                        cursor.executemany('''
-                            INSERT INTO recipes (item_id, resource_id, resource_name, quantity) 
-                            VALUES (?, ?, ?, ?)
-                        ''', recipes_data)
-                        logger.info(f"Inserted {len(recipes_data)} recipe items for {item['name']}")
+            except Exception as e:
+                logger.error(f"Error inserting item {item['name']}: {e}")
+                import traceback
+                logger.error(traceback.format_exc())
 
-                except sqlite3.Error as e:
-                    logger.error(f"Error inserting item {item['name']}: {e}")
-
-            # Commit the transaction
-            conn.commit()
-            logger.info(f"Successfully inserted {len(items)} items for {categorie} - {item_type}")
-
-    def find_resource_name(self, recipe_id, conn):
-        """Find resource name by ID"""
-        try:
-            cursor = conn.cursor()
-            cursor.execute('''
-                SELECT name FROM items 
-                WHERE ankama_id = ?
-            ''', (recipe_id,))
-            result = cursor.fetchone()
-            return result[0] if result else None
-        except sqlite3.Error:
-            return None
-
-def api_to_sqlite():
-    """Main function to fetch API data and insert into SQLite database"""
-    logger.info("Starting API to SQLite data fetch")
+def api_to_django():
+    """Main function to fetch API data and insert into Django database"""
+    logger.info("Starting API to Django data fetch")
     
     base_url = DOFUS_API
     logger.info(f"Dofus API URL: {base_url}")
@@ -298,14 +254,8 @@ def api_to_sqlite():
         sys.exit(1)
 
     try:
-        # Get the parent directory of the current script's directory
-        parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        
-        # Create database path in the parent directory
-        db_path = os.path.join(parent_dir, 'dofus_items.sqlite3')
-
-        # Initialize the fetcher with a specific database path
-        fetcher = DofusItemFetcher(base_url, db_path)
+        # Initialize the fetcher
+        fetcher = DofusItemFetcher(base_url)
 
         for categorie in ["resources", "equipment", "consumables", "mounts"]:
             logger.info(f"Processing category: {categorie}")
@@ -328,18 +278,12 @@ def api_to_sqlite():
             else:
                 continue
 
-            # Multithreaded fetching and inserting
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                futures = [
-                    executor.submit(fetch_and_insert, categorie, item_type, level_min, level_max, fetcher)
-                    for item_type in types
-                ]
-                
-                # Wait for all threads to complete
-                concurrent.futures.wait(futures)
-            
-            # Slowdown between categories
-            time.sleep(2)
+            # Process items sequentially to avoid race conditions
+            for item_type in types:
+                items = fetcher.get_item(categorie, item_type, level_min, level_max)
+                if items:
+                    fetcher.insert_item_to_database(categorie, items, item_type)
+                time.sleep(1)
 
     except KeyboardInterrupt:
         logger.warning("Script stopped with Ctrl + C.")
@@ -348,15 +292,8 @@ def api_to_sqlite():
         import traceback
         logger.error(traceback.format_exc())
 
-def fetch_and_insert(categorie, item_type, level_min, level_max, fetcher):
-    """Helper function for fetching and inserting items"""
-    items = fetcher.get_item(categorie, item_type, level_min, level_max)
-    if items:
-        fetcher.insert_item_to_database(categorie, items, item_type)
-    time.sleep(1)
-
 if __name__ == "__main__":
     try:
-        api_to_sqlite()
+        api_to_django()
     except KeyboardInterrupt:
         logger.warning("Script stopped with Ctrl + C.")
