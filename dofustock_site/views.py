@@ -269,3 +269,34 @@ def scrape_build(request):
         import traceback
         traceback.print_exc()  # Print full traceback to server console
         return JsonResponse({'error': str(e)}, status=500)
+
+def watchlist(request):
+    watchlist, _ = Watchlist.objects.get_or_create(user=request.user)
+    listings = watchlist.listings.all()
+    if not request.user.is_authenticated:
+        return redirect("login")
+    
+    # Fetch highest bid for each listing
+    for listing in listings:
+            listing.highest_bid = get_highest_bid(listing)
+            listing.bidder = get_bidder(listing)  # Now this returns a User object
+            print(f"Listing: {listing.title}, Highest Bid: {listing.highest_bid}, Bidder: {listing.bidder}")
+
+
+    return render(request, "auctions/product_page.html", {
+        "listings": listings,
+        "MEDIA_URL": settings.MEDIA_URL,
+        "watchlist_items": set(listings.values_list("id", flat=True)),
+        "show_watchlist_button": True 
+    })
+
+def toggle_watchlist(request, auction_id):
+    if request.user.is_authenticated:
+        listing = get_object_or_404(Auction, id=auction_id)
+        watchlist, _ = Watchlist.objects.get_or_create(user=request.user)
+        if listing in watchlist.listings.all():
+            watchlist.listings.remove(listing)
+        else:
+            watchlist.listings.add(listing)
+        return redirect(request.META.get('HTTP_REFERER', 'index'))
+    return redirect("login")

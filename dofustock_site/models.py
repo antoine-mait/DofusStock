@@ -28,3 +28,10 @@ class Recipe(models.Model):
     resource_id = models.IntegerField()
     resource_name = models.CharField(max_length=255)
     quantity = models.IntegerField()
+
+class Watchlist(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    listings = models.ManyToManyField(Auction)
+
+    def __str__(self):
+        return f"Watch list of {self.user.username}"
