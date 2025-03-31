@@ -1,0 +1,29 @@
+/* Import all style files */
+@import 'base.css';
+@import 'components.css';
+@import 'layout.css';
+/* @import 'encyclopedia.css';
+@import 'item-detail.css';
+@import 'craft-list.css';   */
+
+/* Any additional styles specific to the main application */
+.navbar-custom {
+    margin-bottom: 20px;
+}
+
+.body {
+    min-height: calc(100vh - 56px); /* 56px is standard navbar height */
+}
+
+/* Utility classes */
+.text-center {
+    text-align: center;
+}
+
+.mt-20 {
+    margin-top: 20px;
+}
+
+.mb-20 {
+    margin-bottom: 20px;
+}

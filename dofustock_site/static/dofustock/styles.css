@@ -12,22 +12,10 @@ body {
     background-color: #f4f4f4;
 }
 
-a {
-    color: inherit; /* Uses the parent element's text color */
-    text-decoration: none; /* Removes underline */
-}
-
-a:hover {
-    color: inherit; /* Keeps the same color on hover */
-    text-decoration: none; /* Prevents underline on hover */
-    outline: none; /* Removes browser's default focus outline */
-}
-
-a:active,
-a:focus {
+a, a:hover, a:active, a:focus {
     color: inherit;
     text-decoration: none;
-    outline: none; /* Removes any blue/dotted outline on click or focus */
+    outline: none;
 }
 
 /* Encyclopedia Container */
@@ -39,10 +27,8 @@ a:focus {
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-/* Category and Item Type Buttons */
-.category-buttons, 
-.item-type-buttons,
-.title {
+/* Category, Item Type Buttons and Title */
+.category-buttons, .item-type-buttons, .title {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
@@ -51,18 +37,17 @@ a:focus {
     justify-content: center;
 }
 
-.category-button, 
-.item-type-button {
+.category-button, .item-type-button {
     padding: 10px 15px;
     background-color: #f0f0f0;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s, transform 0.2s;
+    box-shadow: -2px 2px 5px rgba(0,0,0,0.2);
 }
 
-.category-button:hover, 
-.item-type-button:hover {
+.category-button:hover, .item-type-button:hover {
     background-color: #e0e0e0;
     transform: scale(1.05);
 }
@@ -101,6 +86,7 @@ a:focus {
     height: 100%;
     background-color: white;
     transition: box-shadow 0.3s, transform 0.3s;
+    box-shadow: -4px 4px 10px rgba(0,0,0,0.08);
 }
 
 .item-card:hover {
@@ -122,7 +108,7 @@ a:focus {
     margin: 0 auto;
     padding: 20px;
     background-color: white;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    box-shadow: 0 0 15px rgba(0,0,0,0.1), -4px 4px 10px rgba(0,0,0,0.08);
 }
 
 /* Item Header */
@@ -154,7 +140,13 @@ a:focus {
     align-items: flex-start;
     gap: 20px;
     margin-bottom: 20px;
-    
+}
+
+.item-image, .item-description, .item-recipes, .item-effects {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: -4px 4px 10px rgba(0,0,0,0.08);
 }
 
 .item-image {
@@ -162,9 +154,6 @@ a:focus {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f9f9f9;
-    padding: 15px;
-    border-radius: 8px;
 }
 
 .item-image img {
@@ -175,12 +164,9 @@ a:focus {
 
 .item-description {
     flex: 1;
-    background-color: #f9f9f9;
-    padding: 15px;
-    border-radius: 8px;
 }
 
-.item-description h2 {
+.item-description h2, .item-recipes h2, .item-effects h2 {
     margin-bottom: 10px;
     color: #2c3e50;
     border-bottom: 1px solid #e0e0e0;
@@ -194,20 +180,8 @@ a:focus {
     width: 100%;
 }
 
-.item-recipes,
-.item-effects {
+.item-recipes, .item-effects {
     flex: 1;
-    background-color: #f9f9f9;
-    padding: 15px;
-    border-radius: 8px;
-}
-
-.item-recipes h2,
-.item-effects h2 {
-    margin-bottom: 10px;
-    color: #2c3e50;
-    border-bottom: 1px solid #e0e0e0;
-    padding-bottom: 5px;
 }
 
 /* Recipes Table */
@@ -216,8 +190,7 @@ a:focus {
     border-collapse: collapse;
 }
 
-.item-recipes th,
-.item-recipes td {
+.item-recipes th, .item-recipes td {
     border: 1px solid #ddd;
     padding: 8px;
     vertical-align: middle;
@@ -257,25 +230,9 @@ a:focus {
     text-align: left;
 }
 
-
-.item-detail-container,
-.item-card,
-.item-image,
-.item-description,
-.item-recipes,
-.item-effects {
-    box-shadow: -4px 4px 10px rgba(0,0,0,0.08);
-}
-
-.category-button,
-.item-type-button {
-    box-shadow: -2px 2px 5px rgba(0,0,0,0.2);
-}
-
 /* Responsive Adjustments */
 @media (max-width: 768px) {
-    .item-details-header,
-    .item-details-row {
+    .item-details-header, .item-details-row {
         flex-direction: column;
     }
 

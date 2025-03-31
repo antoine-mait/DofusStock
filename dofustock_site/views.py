@@ -1,12 +1,12 @@
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponseRedirect
-from django.shortcuts import render 
+from django.http import HttpResponseRedirect 
+from django.shortcuts import render , redirect , get_object_or_404
 from django.urls import reverse
 from django.conf import settings
 from django.http import JsonResponse
-from .models import User , Item
+from .models import User , Item , Craftlist
 from playwright.sync_api import sync_playwright
 import json
 from django.db.models import Case, When, IntegerField, Value
@@ -17,7 +17,6 @@ from .utils import sanitize_filename
 def index(request):
 
     return render(request, "dofustock/index.html")
-
 
 def login_view(request):
     if request.method == "POST":
@@ -148,6 +147,12 @@ def item_detail(request, ankama_id):
     try:
         item = Item.objects.get(ankama_id=ankama_id)
         
+        # Get craftlist for the current user
+        craftlist = set()
+        if request.user.is_authenticated:
+            user_craftlist, _ = Craftlist.objects.get_or_create(user=request.user)
+            craftlist = set(user_craftlist.item.values_list("ankama_id", flat=True))
+        
         # Sanitize filename
         item.sanitized_name = sanitize_filename(item.name)
         
@@ -171,6 +176,7 @@ def item_detail(request, ankama_id):
             'item': item,
             'effects': effects,
             'recipes': recipes,
+            'craftlist': craftlist,
         })
     except Item.DoesNotExist:
         return HttpResponseRedirect(reverse("encyclopedie"))
@@ -245,8 +251,34 @@ def scrape_dofus_build_items(request, url):
         return []
     
 def craft_list(request):
+    if not request.user.is_authenticated:
+        return redirect("login")
+    
+    craftlist, _ = Craftlist.objects.get_or_create(user=request.user)
+    items = craftlist.item.all()  
 
-    return render(request, "dofustock/craft_list.html")
+    for item in items : 
+        item.sanitized_name = sanitize_filename(item.name)
+
+    # Fetch recipes with full resource details
+    recipes = []
+    for recipe in item.recipes.all():
+        recipe_dict = recipe.__dict__
+        
+        # Try to find the resource item
+        try:
+            resource_item = Item.objects.get(ankama_id=recipe.resource_id)
+            recipe_dict['resource_image'] = f"/media/IMG/{resource_item.category}/{resource_item.item_type}/{resource_item.ankama_id}-{sanitize_filename(resource_item.name)}.png"
+        except Item.DoesNotExist:
+            recipe_dict['resource_image'] = '/media/IMG/equipment/Outil/489-Loupe.png'
+        
+        recipes.append(recipe_dict)
+
+    return render(request, "dofustock/craft_list.html", {
+        "items": items,
+        "craftlist": set(items.values_list("ankama_id", flat=True)),
+        "recipes": recipes,
+    })
 
 def scrape_build(request):
     url = request.GET.get('url', '')
@@ -270,33 +302,13 @@ def scrape_build(request):
         traceback.print_exc()  # Print full traceback to server console
         return JsonResponse({'error': str(e)}, status=500)
 
-def watchlist(request):
-    watchlist, _ = Watchlist.objects.get_or_create(user=request.user)
-    listings = watchlist.listings.all()
-    if not request.user.is_authenticated:
-        return redirect("login")
-    
-    # Fetch highest bid for each listing
-    for listing in listings:
-            listing.highest_bid = get_highest_bid(listing)
-            listing.bidder = get_bidder(listing)  # Now this returns a User object
-            print(f"Listing: {listing.title}, Highest Bid: {listing.highest_bid}, Bidder: {listing.bidder}")
-
-
-    return render(request, "auctions/product_page.html", {
-        "listings": listings,
-        "MEDIA_URL": settings.MEDIA_URL,
-        "watchlist_items": set(listings.values_list("id", flat=True)),
-        "show_watchlist_button": True 
-    })
-
-def toggle_watchlist(request, auction_id):
+def toggle_craftlist(request, ankama_id):
     if request.user.is_authenticated:
-        listing = get_object_or_404(Auction, id=auction_id)
-        watchlist, _ = Watchlist.objects.get_or_create(user=request.user)
-        if listing in watchlist.listings.all():
-            watchlist.listings.remove(listing)
+        item = get_object_or_404(Item, ankama_id=ankama_id)  
+        craftlist, _ = Craftlist.objects.get_or_create(user=request.user)
+        if item in craftlist.item.all():
+            craftlist.item.remove(item)
         else:
-            watchlist.listings.add(listing)
+            craftlist.item.add(item)
         return redirect(request.META.get('HTTP_REFERER', 'index'))
     return redirect("login")

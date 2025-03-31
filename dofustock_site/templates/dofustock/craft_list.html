@@ -35,6 +35,53 @@
                 <h3 class="d-none" id="results-title">Items Found:</h3>
                 <div id="items-list"></div>
             </div>
+            {% if items %}
+            <div class="mt-5">
+                <h3>Your Craft List</h3>
+                <div class="row">
+                    {% for item in items %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ item.name }}</h5>
+                                <img src="/media/IMG/{{item.category}}/{{item.item_type}}/{{item.ankama_id}}-{{item.sanitized_name}}.png" 
+                                    alt="{{item.name}}"
+                                    onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;">
+                                <p class="card-text">Level: {{ item.level }}</p>
+                                <p class="card-text">Category: {{ item.level }}</p>
+
+                                {% for recipe in recipes %}
+                                <tr>
+                                    <td>
+                                        <img 
+                                            src="{{ recipe.resource_image }}" 
+                                            alt="{{ recipe.resource_name }}"
+                                            style="max-width: 50px; max-height: 50px; object-fit: contain;"
+                                            onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;"
+                                        >
+                                    </td>
+                                    <td>{{ recipe.quantity }}</td>
+                                    <td>{{ recipe.resource_name }}</td>
+                                </tr>
+                                {% endfor %}
+                                <a href="{% url 'item_detail' item.ankama_id %}" class="btn btn-primary btn-sm">View Details</a>
+                                <form method="POST" action="{% url 'toggle_craftlist' item.ankama_id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="mt-5">
+                <div class="alert alert-info">
+                    Your craft list is currently empty. Add items from the item detail pages.
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

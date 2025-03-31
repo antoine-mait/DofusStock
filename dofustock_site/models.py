@@ -18,10 +18,15 @@ class Item(models.Model):
     image_url = models.CharField(max_length=255, blank=True)
     is_weapon = models.BooleanField(default=False)
 
+    def __str__(self):
+        return f"{self.name} / {self.ankama_id} / {self.category} / {self.item_type} / {self.level}"
+    
 class Effect(models.Model):
     item = models.ForeignKey(Item, related_name='effects', on_delete=models.CASCADE, default=1)
     description = models.TextField()
 
+    def __str__(self):
+            return f"effect of {self.item.name}"
 
 class Recipe(models.Model):
     item = models.ForeignKey(Item, related_name='recipes', on_delete=models.CASCADE, default=1)  # Assuming ID 1 exists
@@ -29,9 +34,12 @@ class Recipe(models.Model):
     resource_name = models.CharField(max_length=255)
     quantity = models.IntegerField()
 
-class Watchlist(models.Model):
+    def __str__(self):
+            return f"Recipe of {self.item.name}"
+    
+class Craftlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    listings = models.ManyToManyField(Auction)
+    item = models.ManyToManyField(Item)
 
     def __str__(self):
-        return f"Watch list of {self.user.username}"
+        return f"Craft list of {self.user.username}"
