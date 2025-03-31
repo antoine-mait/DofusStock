@@ -255,29 +255,75 @@ def craft_list(request):
         return redirect("login")
     
     craftlist, _ = Craftlist.objects.get_or_create(user=request.user)
-    items = craftlist.item.all()  
-
-    for item in items : 
-        item.sanitized_name = sanitize_filename(item.name)
-
-    # Fetch recipes with full resource details
-    recipes = []
-    for recipe in item.recipes.all():
-        recipe_dict = recipe.__dict__
+    items = craftlist.item.all()
+    
+    # Process items and their recipes
+    items_with_recipes = []
+    
+    # Dictionary to track total resources needed
+    total_resources = {}
+    
+    for item in items:
+        item_data = {
+            'ankama_id': item.ankama_id,
+            'name': item.name,
+            'category': item.category,
+            'item_type': item.item_type,
+            'level': item.level,
+            'sanitized_name': sanitize_filename(item.name),
+            'recipes': []
+        }
         
-        # Try to find the resource item
-        try:
-            resource_item = Item.objects.get(ankama_id=recipe.resource_id)
-            recipe_dict['resource_image'] = f"/media/IMG/{resource_item.category}/{resource_item.item_type}/{resource_item.ankama_id}-{sanitize_filename(resource_item.name)}.png"
-        except Item.DoesNotExist:
-            recipe_dict['resource_image'] = '/media/IMG/equipment/Outil/489-Loupe.png'
-        
-        recipes.append(recipe_dict)
-
+        # Process recipes for this item
+        for recipe in item.recipes.all():
+            recipe_dict = {
+                'quantity': recipe.quantity,
+                'resource_name': recipe.resource_name,
+                'resource_id': recipe.resource_id
+            }
+            
+            # Try to find the resource item
+            try:
+                resource_item = Item.objects.get(ankama_id=recipe.resource_id)
+                resource_image = f"/media/IMG/{resource_item.category}/{resource_item.item_type}/{resource_item.ankama_id}-{sanitize_filename(resource_item.name)}.png"
+                recipe_dict['resource_image'] = resource_image
+                
+                # Add to total resources
+                resource_key = str(recipe.resource_id)
+                if resource_key not in total_resources:
+                    total_resources[resource_key] = {
+                        'resource_id': recipe.resource_id,
+                        'resource_name': recipe.resource_name,
+                        'quantity': 0,
+                        'resource_image': resource_image
+                    }
+                total_resources[resource_key]['quantity'] += recipe.quantity
+                
+            except Item.DoesNotExist:
+                recipe_dict['resource_image'] = '/media/IMG/equipment/Outil/489-Loupe.png'
+                
+                # Add to total resources even if resource item not found
+                resource_key = str(recipe.resource_id)
+                if resource_key not in total_resources:
+                    total_resources[resource_key] = {
+                        'resource_id': recipe.resource_id,
+                        'resource_name': recipe.resource_name,
+                        'quantity': 0,
+                        'resource_image': '/media/IMG/equipment/Outil/489-Loupe.png'
+                    }
+                total_resources[resource_key]['quantity'] += recipe.quantity
+                
+            item_data['recipes'].append(recipe_dict)
+            
+        items_with_recipes.append(item_data)
+    
+    # Convert total_resources dictionary to a list for the template
+    all_resources = list(total_resources.values())
+    
     return render(request, "dofustock/craft_list.html", {
-        "items": items,
+        "items": items_with_recipes,
         "craftlist": set(items.values_list("ankama_id", flat=True)),
-        "recipes": recipes,
+        "all_resources": all_resources
     })
 
 def scrape_build(request):
@@ -306,9 +352,26 @@ def toggle_craftlist(request, ankama_id):
     if request.user.is_authenticated:
         item = get_object_or_404(Item, ankama_id=ankama_id)  
         craftlist, _ = Craftlist.objects.get_or_create(user=request.user)
+        
         if item in craftlist.item.all():
             craftlist.item.remove(item)
+            status = 'removed'
         else:
             craftlist.item.add(item)
+            status = 'added'
+        
+        # Check if it's an AJAX request
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        
+        if is_ajax:
+            return JsonResponse({'status': status, 'item_id': ankama_id})
+        
+        # If not AJAX, redirect as before
         return redirect(request.META.get('HTTP_REFERER', 'index'))
+    
+    # If not authenticated and it's an AJAX request
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+    
     return redirect("login")
+

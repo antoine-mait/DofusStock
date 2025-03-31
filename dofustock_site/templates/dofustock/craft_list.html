@@ -10,6 +10,7 @@
             <p class="card-text">Enter a Dofus Build URL (https://d-bk.net/fr/d/...) to extract items:</p>
             
             <form id="url-form" class="mb-4">
+                {% csrf_token %}
                 <div class="input-group">
                     <input 
                         type="text" 
@@ -35,12 +36,47 @@
                 <h3 class="d-none" id="results-title">Items Found:</h3>
                 <div id="items-list"></div>
             </div>
-            {% if items %}
-            <div class="mt-5">
+            
+            <div class="craft-list-container mt-5">
+                {% if items %}
                 <h3>Your Craft List</h3>
+                <div>
+                <h4> Ressources ! </h4>
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Total Resources Needed</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    {% for resource in all_resources %}
+                                    <div class="col-md-3 mb-3">
+                                        <div class="card">
+                                            <div class="card-body d-flex align-items-center">
+                                                <img 
+                                                    src="{{ resource.resource_image }}" 
+                                                    alt="{{ resource.resource_name }}"
+                                                    style="max-width: 25px; max-height: 25px; object-fit: contain; margin-right: 10px;"
+                                                    onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;"
+                                                >
+                                                <div>
+                                                    <h5 class="mb-0">{{ resource.quantity }}</h5>
+                                                    <p class="mb-0">{{ resource.resource_name }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
                 <div class="row">
                     {% for item in items %}
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-4 mb-3" id="craft-item-{{ item.ankama_id }}">
                         <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title">{{ item.name }}</h5>
@@ -48,40 +84,42 @@
                                     alt="{{item.name}}"
                                     onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;">
                                 <p class="card-text">Level: {{ item.level }}</p>
-                                <p class="card-text">Category: {{ item.level }}</p>
-
-                                {% for recipe in recipes %}
-                                <tr>
-                                    <td>
-                                        <img 
-                                            src="{{ recipe.resource_image }}" 
-                                            alt="{{ recipe.resource_name }}"
-                                            style="max-width: 50px; max-height: 50px; object-fit: contain;"
-                                            onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;"
-                                        >
-                                    </td>
-                                    <td>{{ recipe.quantity }}</td>
-                                    <td>{{ recipe.resource_name }}</td>
-                                </tr>
-                                {% endfor %}
+                                <p class="card-text">Category: {{ item.item_type }}</p>
+                                
+                                <!-- Recipe table -->
+                                <table class="table table-sm">
+                                    <tbody>
+                                    {% for recipe in item.recipes %}
+                                    <tr>
+                                        <td>
+                                            <img 
+                                                src="{{ recipe.resource_image }}" 
+                                                alt="{{ recipe.resource_name }}"
+                                                style="max-width: 30px; max-height: 30px; object-fit: contain;"
+                                                onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;"
+                                            >
+                                        </td>
+                                        <td>{{ recipe.quantity }}</td>
+                                        <td>{{ recipe.resource_name }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                                
                                 <a href="{% url 'item_detail' item.ankama_id %}" class="btn btn-primary btn-sm">View Details</a>
-                                <form method="POST" action="{% url 'toggle_craftlist' item.ankama_id %}" class="d-inline">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-danger btn-sm">Remove</button>
-                                </form>
+                                <button type="button" class="btn btn-danger btn-sm remove-from-craft-list" data-item-id="{{ item.ankama_id }}">Remove</button>
                             </div>
                         </div>
                     </div>
+                    
                     {% endfor %}
-                </div>
-            </div>
-            {% else %}
-            <div class="mt-5">
+                    
+                {% else %}
                 <div class="alert alert-info">
                     Your craft list is currently empty. Add items from the item detail pages.
                 </div>
+                {% endif %}
             </div>
-            {% endif %}
         </div>
     </div>
 </div>
