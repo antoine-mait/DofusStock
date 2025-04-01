@@ -1,5 +1,10 @@
 {% extends "dofustock/layout.html" %}
 
+{% load static %}
+
+{% block head_extra %}
+<link href="{% static 'dofustock/css/craft-list.css' %}" rel="stylesheet">
+{% endblock %}
 {% block body %}
 <div class="container mt-4">
     <div class="card">
@@ -74,44 +79,73 @@
                     </div>
                 </div>
             </div>
+            <h4> Items ! </h4>
                 <div class="row">
-                    {% for item in items %}
-                    <div class="col-md-4 mb-3" id="craft-item-{{ item.ankama_id }}">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">{{ item.name }}</h5>
-                                <img src="/media/IMG/{{item.category}}/{{item.item_type}}/{{item.ankama_id}}-{{item.sanitized_name}}.png" 
-                                    alt="{{item.name}}"
-                                    onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;">
-                                <p class="card-text">Level: {{ item.level }}</p>
-                                <p class="card-text">Category: {{ item.item_type }}</p>
+                {% for item in items %}
+                <div class="col-md-4 mb-3" id="craft-item-{{ item.ankama_id }}">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <!-- Left column: Title and metadata -->
+                                <div class="item-info">
+                                    <h5 class="card-title">{{ item.name }}</h5>
+                                    <div class="item-metadata">
+                                        <p class="card-text"><span>{{ item.item_type }} - Level:</span> {{ item.level }}</p>
+                                    </div>
+                                </div>
+
+                                <!-- Middle column: Buttons -->
+                                <div class="button-container mx-1">
+                                    <button type="button" class="btn btn-danger btn-sm remove-from-craft-list" 
+                                            data-item-id="{{ item.ankama_id }}"
+                                            style="border: none; background: transparent; padding: 0;">
+                                            <img class="trash icon-small" src="/media/Icon/trash.png" alt="delete" >
+                                    </button>
+                                    <a href="{% url 'item_detail' item.ankama_id %}" 
+                                    style="border: none; background: transparent; padding: 0; margin-bottom: 5px; display: block;">
+                                        <img class="info icon-small" src="/media/Icon/info.png" alt="details">
+                                    </a>
+
+                                </div>
+
+                                <!-- Right column: Image -->
+                                <div class="item-image">
+                                    <img src="/media/IMG/{{item.category}}/{{item.item_type}}/{{item.ankama_id}}-{{item.sanitized_name}}.png" 
+                                        alt="{{item.name}}" class="item_img"
+                                        onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;">
+                                </div>
+                            </div>
                                 
                                 <!-- Recipe table -->
-                                <table class="table table-sm">
+                            <div class="item-recipes">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th class="recipe-image"></th>
+                                            <th class="recipe-quantity">Quantity</th>
+                                            <th class="recipe-name">Resource</th>
+                                        </tr>
+                                    </thead>
                                     <tbody>
-                                    {% for recipe in item.recipes %}
-                                    <tr>
-                                        <td>
-                                            <img 
-                                                src="{{ recipe.resource_image }}" 
-                                                alt="{{ recipe.resource_name }}"
-                                                style="max-width: 30px; max-height: 30px; object-fit: contain;"
-                                                onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;"
-                                            >
-                                        </td>
-                                        <td>{{ recipe.quantity }}</td>
-                                        <td>{{ recipe.resource_name }}</td>
-                                    </tr>
-                                    {% endfor %}
+                                        {% for recipe in item.recipes %}
+                                        <tr>
+                                            <td>
+                                                <img 
+                                                    src="{{ recipe.resource_image }}" 
+                                                    alt="{{ recipe.resource_name }}"
+                                                    onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;"
+                                                >
+                                            </td>
+                                            <td>{{ recipe.quantity }}</td>
+                                            <td>{{ recipe.resource_name }}</td>
+                                        </tr>
+                                        {% endfor %}
                                     </tbody>
                                 </table>
-                                
-                                <a href="{% url 'item_detail' item.ankama_id %}" class="btn btn-primary btn-sm">View Details</a>
-                                <button type="button" class="btn btn-danger btn-sm remove-from-craft-list" data-item-id="{{ item.ankama_id }}">Remove</button>
+                            </div>                                
                             </div>
                         </div>
                     </div>
-                    
                     {% endfor %}
                     
                 {% else %}

@@ -1,22 +1,43 @@
 {% extends "dofustock/layout.html" %}
+{% load static %}
+
+{% block head_extra %}
+<link href="{% static 'dofustock/css/item-detail.css' %}" rel="stylesheet">
+{% endblock %}
 
 {% block body %}
 <div class="item-detail-container">
     <div class="item-header">
         <div class="item-header-content">
             <h1>{{ item.name }}</h1>
-            <div class="craft_list">
-                <form method="POST" action="{% url 'toggle_craftlist' item.ankama_id %}">
-                    {% csrf_token %}
-                    <button type="submit">
-                        {% if item.ankama_id in craftlist %}
-                            Remove from craft list
-                        {% else %}
-                            Add to craft list
-                        {% endif %}
-                    </button>
-                </form>
-            </div>
+            {% if item.ankama_id in craftlist %}
+
+                <div class="craft_list" >
+                    <form method="POST" action="{% url 'toggle_craftlist' item.ankama_id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm remove-from-craft-list">
+                            
+                                Remove from craft list
+
+                        </button>
+                    </form>
+                </div>
+
+            {% else %}
+
+                <div class="craft_list">
+                    <form method="POST" action="{% url 'toggle_craftlist' item.ankama_id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary btn-sm add-to-craft-list">
+
+                                Add to craft list
+
+                        </button>
+                    </form>
+                </div>
+
+            {% endif %}
+
             <div class="item-metadata">
                 <p><strong><u>Level</u></strong>: {{ item.level }}</p>
                 <p><strong><u>Category</u></strong>: {{ item.category }}</p>

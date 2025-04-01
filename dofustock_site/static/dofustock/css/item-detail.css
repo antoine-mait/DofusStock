@@ -1,0 +1,119 @@
+.item-detail-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1), -4px 4px 10px rgba(0,0,0,0.08);
+}
+
+.item-header {
+    margin-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+}
+
+.item-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.item-header h1 {
+    color: #2c3e50;
+    font-size: 2rem;
+}
+
+.craft_list,
+.item-metadata {
+    text-align: right;
+    color: #7f8c8d;
+}
+
+.item-details-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.item-image, .item-description, .item-recipes, .item-effects {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: -4px 4px 10px rgba(0,0,0,0.08);
+}
+
+.item-image {
+    flex: 0 0 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.item-image img {
+    max-width: 300px;
+    max-height: 300px;
+    object-fit: contain;
+}
+
+.item-description, .item-recipes, .item-effects {
+    flex: 1;
+}
+
+.item-description h2, .item-recipes h2, .item-effects h2 {
+    margin-bottom: 10px;
+    color: #2c3e50;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 5px;
+}
+
+.item-details-row {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+}
+
+.item-recipes table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.item-recipes th, .item-recipes td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.item-recipes th {
+    background-color: #f2f2f2;
+    text-align: left;
+}
+
+.item-recipes .recipe-image {
+    width: 10%;
+    text-align: left;
+}
+
+.item-recipes .recipe-quantity {
+    width: 15%;
+    text-align: left;
+}
+
+.item-recipes .recipe-name {
+    width: 75%;
+    text-align: left;
+}
+
+.item-recipes img {
+    max-width: 50px;
+    max-height: 50px;
+    object-fit: contain;
+}
+
+/* Effects List */
+.item-effects ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    text-align: left;
+}
