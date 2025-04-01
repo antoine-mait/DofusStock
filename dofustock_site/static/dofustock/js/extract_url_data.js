@@ -97,6 +97,13 @@ async function displayExtractedItems(items) {
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     
     if (items.length > 0) {
+
+        const gridContainer = document.createElement('div');
+        gridContainer.style.display = "grid";
+        gridContainer.style.gridTemplateColumns = "repeat(2, 1fr)"; // 2 columns
+        gridContainer.style.gap = "10px"; // Spacing between items
+        gridContainer.style.width = "100%";
+
         // Process each item to search for it in the database and get its image
         for (const itemName of items) {
             try {
@@ -116,32 +123,37 @@ async function displayExtractedItems(items) {
                     const isInCraftList = document.getElementById(`craft-item-${item.ankama_id}`) !== null;
                     
                     itemElement.innerHTML = `
-                        <div class="item-container" style="display: flex; align-items: center;">
+                        <div class="item-container">
+                            <!-- Image Column -->
                             <img 
+                                class="item_img_url"
                                 src="${imagePath}" 
                                 alt="${item.name}"
-                                onerror="this.src='${window.FALLBACK_IMAGE}'; this.onerror=null;"
-                                style="width: 40px; height: 40px; margin-right: 10px;"
-                            >
+                                onerror="this.src='${window.FALLBACK_IMAGE}'; this.onerror=null;">
+                            
+                            <!-- Item Name Column -->
                             <a href="/item/${item.ankama_id}/" class="item-link">${itemName}</a>
-                            <button 
-                                type="button" 
-                                class="add-to-craftlist-btn btn ${isInCraftList ? 'btn-success' : 'btn-primary'}" 
-                                data-item-id="${item.ankama_id}" 
-                                data-item-data="${encodeURIComponent(JSON.stringify(item))}"
-                                data-csrf="${csrfToken}"
-                                style="margin-left: 10px;"
-                                ${isInCraftList ? 'disabled' : ''}
-                            >
-                                ${isInCraftList ? 'Added to craft list' : 'Add to craft list'}
-                            </button>
+                            
+                            <!-- Button Column (Aligned to Right) -->
+                            <div>
+                                <button 
+                                    type="button" 
+                                    class="add-to-craftlist-btn btn ${isInCraftList ? 'btn-success' : 'btn-primary'}" 
+                                    data-item-id="${item.ankama_id}" 
+                                    data-item-data="${encodeURIComponent(JSON.stringify(item))}"
+                                    data-csrf="${csrfToken}"
+                                    ${isInCraftList ? 'disabled' : ''}>
+                                    ${isInCraftList ? 'Added to craft list' : 'Add to craft list'}
+                                </button>
+                            </div>
                         </div>
                     `;
+
                 } else {
                     itemElement.textContent = itemName + " (Not found in database)";
                 }
                 
-                window.itemsList.appendChild(itemElement);
+                gridContainer.appendChild(itemElement);
             } catch (searchError) {
                 console.error('Error searching for item:', searchError);
                 
@@ -149,9 +161,11 @@ async function displayExtractedItems(items) {
                 const itemElement = document.createElement('p');
                 itemElement.textContent = itemName;
                 itemElement.classList.add('item-entry');
-                window.itemsList.appendChild(itemElement);
+                gridContainer.appendChild(itemElement);
             }
         }
+        
+        window.itemsList.appendChild(gridContainer);
         
         // Add event listeners to the new buttons
         document.querySelectorAll('.add-to-craftlist-btn').forEach(button => {

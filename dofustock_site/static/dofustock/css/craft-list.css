@@ -24,13 +24,37 @@ span{
     height: auto;
 }
 
-.item_img {
+.item_img, .item_img_url {
     width: 60px;
     height: 60px;
     object-fit: contain;
     border-radius: 5px;
     border: 1px solid #ddd;
     box-shadow: 0 0 15px rgba(0,0,0,0.1), -4px 4px 10px rgba(0,0,0,0.08);
+}
+
+.item_img_url {
+    width: 40px;
+    height: auto; 
+    margin-right: 10px;
+}
+
+.item-link {
+    margin-left: 10px; 
+}
+
+.item-container{
+    display: grid;
+    grid-template-columns: 50px 1fr auto;
+    align-items: center;
+    width: 100%;
+    margin-bottom: -15px;
+}
+.button-container {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-left: 10px; /* Space between text and button */
 }
 
 .item-info {
