@@ -74,7 +74,6 @@ def encyclopedie(request):
     return render(request, "dofustock/encyclopedie.html",{
         "items" : all_items,
         "categories" : categories,
-
     })
 
 def get_item_types(request):

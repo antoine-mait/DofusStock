@@ -282,6 +282,10 @@ def api_to_django():
             for item_type in types:
                 items = fetcher.get_item(categorie, item_type, level_min, level_max)
                 if items:
+                    if categorie == 'mounts':
+                        for item in items:
+                            if 'recipe' in item:
+                                del item['recipe']
                     fetcher.insert_item_to_database(categorie, items, item_type)
                 time.sleep(1)
 
