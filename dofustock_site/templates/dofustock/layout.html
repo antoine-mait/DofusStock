@@ -5,9 +5,14 @@
     <head>
         <title>{% block title %}DofuStonk{% endblock %}</title>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        
         <link href="{% static 'dofustock/css/main.css' %}" rel="stylesheet">
         {% block head_extra %}{% endblock %}
-        <script src="{% static 'dofustock/dofustock.js' %}"></script>
+
+        <script src="{% static 'dofustock/js/base.js' %}"></script>
+        <script src="{% static 'dofustock/js/encyclopedia.js' %}"></script>
+        <script src="{% static 'dofustock/js/craft_list.js' %}"></script>
+        <script src="{% static 'dofustock/js/extract_url_data.js' %}"></script>
 
         <meta name="csrf-token" content="{{ csrf_token }}">
         
