@@ -76,6 +76,44 @@ def encyclopedie(request):
         "categories" : categories,
     })
 
+def item_detail(request, ankama_id):
+    try:
+        item = Item.objects.get(ankama_id=ankama_id)
+        
+        # Get craftlist for the current user
+        craftlist = set()
+        if request.user.is_authenticated:
+            user_craftlist, _ = Craftlist.objects.get_or_create(user=request.user)
+            craftlist = set(user_craftlist.item.values_list("ankama_id", flat=True))
+        
+        # Sanitize filename
+        item.sanitized_name = sanitize_filename(item.name)
+        
+        # Fetch recipes with full resource details
+        recipes = []
+        for recipe in item.recipes.all():
+            recipe_dict = recipe.__dict__
+            
+            # Try to find the resource item
+            try:
+                resource_item = Item.objects.get(ankama_id=recipe.resource_id)
+                recipe_dict['resource_image'] = f"/media/IMG/{resource_item.category}/{resource_item.item_type}/{resource_item.ankama_id}-{sanitize_filename(resource_item.name)}.png"
+            except Item.DoesNotExist:
+                recipe_dict['resource_image'] = '/media/IMG/equipment/Outil/489-Loupe.png'
+            
+            recipes.append(recipe_dict)
+        
+        effects = list(item.effects.values())
+        
+        return render(request, "dofustock/item.html", {
+            'item': item,
+            'effects': effects,
+            'recipes': recipes,
+            'craftlist': craftlist,
+        })
+    except Item.DoesNotExist:
+        return HttpResponseRedirect(reverse("encyclopedie"))
+    
 def get_item_types(request):
     category = request.GET.get('category')
     
@@ -141,45 +179,7 @@ def get_items_recipe(request, ankama_id):
         return JsonResponse(item_data)
     except Item.DoesNotExist:
         return JsonResponse({'error': 'Item not found'}, status=404)
-    
-def item_detail(request, ankama_id):
-    try:
-        item = Item.objects.get(ankama_id=ankama_id)
-        
-        # Get craftlist for the current user
-        craftlist = set()
-        if request.user.is_authenticated:
-            user_craftlist, _ = Craftlist.objects.get_or_create(user=request.user)
-            craftlist = set(user_craftlist.item.values_list("ankama_id", flat=True))
-        
-        # Sanitize filename
-        item.sanitized_name = sanitize_filename(item.name)
-        
-        # Fetch recipes with full resource details
-        recipes = []
-        for recipe in item.recipes.all():
-            recipe_dict = recipe.__dict__
-            
-            # Try to find the resource item
-            try:
-                resource_item = Item.objects.get(ankama_id=recipe.resource_id)
-                recipe_dict['resource_image'] = f"/media/IMG/{resource_item.category}/{resource_item.item_type}/{resource_item.ankama_id}-{sanitize_filename(resource_item.name)}.png"
-            except Item.DoesNotExist:
-                recipe_dict['resource_image'] = '/media/IMG/equipment/Outil/489-Loupe.png'
-            
-            recipes.append(recipe_dict)
-        
-        effects = list(item.effects.values())
-        
-        return render(request, "dofustock/item.html", {
-            'item': item,
-            'effects': effects,
-            'recipes': recipes,
-            'craftlist': craftlist,
-        })
-    except Item.DoesNotExist:
-        return HttpResponseRedirect(reverse("encyclopedie"))
-    
+   
 def scrape_dofus_build_items(request, url):
     print(f"Scraping started for URL: {url}")
     
@@ -249,6 +249,28 @@ def scrape_dofus_build_items(request, url):
         traceback.print_exc()
         return []
     
+def scrape_build(request):
+    url = request.GET.get('url', '')
+    
+    # Print debug information to your server console
+    print(f"Received scrape request for URL: {url}")
+    
+    if not url or not url.startswith('https://d-bk.net/'):
+        print("Invalid URL format")
+        return JsonResponse({'error': 'Invalid URL'}, status=400)
+    
+    try:
+        # Call your existing scrape function
+        print("Starting web scraping...")
+        items = scrape_dofus_build_items(request, url)
+        print(f"Scraping complete, found {len(items)} items: {items}")
+        return JsonResponse(items, safe=False)
+    except Exception as e:
+        print(f"Error during scraping: {str(e)}")
+        import traceback
+        traceback.print_exc()  # Print full traceback to server console
+        return JsonResponse({'error': str(e)}, status=500)
+
 def craft_list(request):
     if not request.user.is_authenticated:
         return redirect("login")
@@ -324,28 +346,6 @@ def craft_list(request):
         "craftlist": set(items.values_list("ankama_id", flat=True)),
         "all_resources": all_resources
     })
-
-def scrape_build(request):
-    url = request.GET.get('url', '')
-    
-    # Print debug information to your server console
-    print(f"Received scrape request for URL: {url}")
-    
-    if not url or not url.startswith('https://d-bk.net/'):
-        print("Invalid URL format")
-        return JsonResponse({'error': 'Invalid URL'}, status=400)
-    
-    try:
-        # Call your existing scrape function
-        print("Starting web scraping...")
-        items = scrape_dofus_build_items(request, url)
-        print(f"Scraping complete, found {len(items)} items: {items}")
-        return JsonResponse(items, safe=False)
-    except Exception as e:
-        print(f"Error during scraping: {str(e)}")
-        import traceback
-        traceback.print_exc()  # Print full traceback to server console
-        return JsonResponse({'error': str(e)}, status=500)
 
 def toggle_craftlist(request, ankama_id):
     if request.user.is_authenticated:

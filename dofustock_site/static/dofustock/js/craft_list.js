@@ -79,6 +79,7 @@ async function addItemToCraftListUI(item) {
             await toggleCraftlistItem(itemId, true);
         });
     }
+    window.location.href = window.location.href;
 }
 
 // Function to toggle craftlist item via AJAX
@@ -130,7 +131,7 @@ async function toggleCraftlistItem(itemId, isRemove = false) {
                         addBtn.classList.remove('btn-success');
                         addBtn.classList.add('btn-primary');
                     }
-                    
+                    window.location.href = window.location.href;
                     // If craft list is now empty, show empty message
                     const craftListRow = document.querySelector('.craft-list-container .row');
                     if (craftListRow && craftListRow.children.length === 0) {
