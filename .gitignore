@@ -11,6 +11,7 @@ __pycache__/
 
 # Sensitive settings (if you have local settings)
 dofustock_project/settings_local.py
+*/correction.py
 
 # Database
 *.sqlite3

@@ -182,7 +182,7 @@ async function displayExtractedItems(items) {
                     this.classList.add('btn-success');
                     
                     // Update craft list UI
-                    window.addItemToCraftListUI(itemData);
+                    await window.addItemToCraftListUI(itemData);
                 }
             });
         });
