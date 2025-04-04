@@ -343,7 +343,7 @@ def HDV_Screenshot():
             "HDV_RESOURCES": 5,
             "HDV_CONSUMABLE": 5,
             "HDV_ITEM": 5,
-            "HDV_RUNES": 19,
+            "HDV_RUNES": 1,
         }
         nb_loop = nb_loop_mapping.get(HDV_name)
 
@@ -389,7 +389,7 @@ def HDV_Screenshot():
             start_pos = pyautogui.position()
             end_pos = (870,250)
             move_with_jitter(start_pos, end_pos)
-            time.sleep(random.uniform(0.2, 0.5))
+            time.sleep(random.uniform(1, 2))
             real_click(870,250)
 
             time.sleep(random.uniform(0.2, 0.5))
@@ -563,7 +563,7 @@ def HDV_Screenshot():
         """
         Initializes the starting map coordinates and actions.
         """
-        starting_map = "map_name"
+        starting_map = map_name
         print(f"Starting map set to: {starting_map}")
         return starting_map
 
@@ -571,15 +571,21 @@ def HDV_Screenshot():
         """
         Switches between different HDV types based on the current state.
         """
-
+        print("switch map")
+        time.sleep(random.uniform(1, 2))
         hdv_type = map_name
         if starting_map == "HDV_RUNES":
+            print(f"Starting map = {starting_map}")
             if hdv_type == "HDV_RUNES" or hdv_type == "HDV_ITEM":
+                print("first click right")
+                time.sleep(random.uniform(1, 2))
                 click_right()
                 if hdv_type == "HDV_RUNES":
+                    
                     time.sleep(random.uniform(1, 2))
                 if hdv_type =="HDV_ITEM":
                     time.sleep(random.uniform(15, 20))
+                print("second click right")
                 click_right()
                 time.sleep(random.uniform(15, 20))
                 loop_main(main_folder_dir, folder_dir_tmp, map_name_tmp, starting_map)
