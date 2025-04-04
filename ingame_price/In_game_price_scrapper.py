@@ -9,9 +9,12 @@ import re
 import win32api
 import win32con
 import pytesseract as tess
+import ctypes
+from ctypes import wintypes
 from PIL import Image
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from .correction import correction_dict
+
+# from .correction import correction_dict
 from dotenv import load_dotenv
 
 
@@ -19,15 +22,36 @@ load_dotenv()
 main_folder= os.environ.get("MAIN_IMG_FOLDER")
 tmp_folder= os.environ.get("folder_dir_tmp")
 
-def left_click(x, y):
-    win32api.SetCursorPos((x, y))
-    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
+# Define required structures and constants
+LONG = ctypes.c_long
+DWORD = ctypes.c_ulong
+ULONG_PTR = ctypes.POINTER(DWORD)
 
-def press_esc():
-    win32api.keybd_event(win32con.VK_ESCAPE, 0, 0, 0)  # Press ESC
-    time.sleep(0.1)
-    win32api.keybd_event(win32con.VK_ESCAPE, 0, win32con.KEYEVENTF_KEYUP, 0)  # Release ESC   
+class MOUSEINPUT(ctypes.Structure):
+    _fields_ = [
+        ("dx", LONG),
+        ("dy", LONG),
+        ("mouseData", DWORD),
+        ("dwFlags", DWORD),
+        ("time", DWORD),
+        ("dwExtraInfo", ULONG_PTR)
+    ]
+
+class INPUT_UNION(ctypes.Union):
+    _fields_ = [
+        ("mi", MOUSEINPUT),
+    ]
+
+class INPUT(ctypes.Structure):
+    _fields_ = [
+        ("type", DWORD),
+        ("union", INPUT_UNION)
+    ]
+
+# Mouse event flags
+MOUSEEVENTF_LEFTDOWN = 0x0002
+MOUSEEVENTF_LEFTUP = 0x0004
+INPUT_MOUSE = 0
 
 def HDV_Reader():
     """
@@ -300,7 +324,7 @@ def HDV_Screenshot():
                     else:
                         return True # Only return True after STOP was clicked
 
-    def screen_shot_items(img_stop, folder_dir, HDV_name):
+    def screen_shot_items(folder_dir, HDV_name):
         """
         Takes screenshots of items from the HDV and saves them to a folder.
 
@@ -319,15 +343,15 @@ def HDV_Screenshot():
             "HDV_RESOURCES": 5,
             "HDV_CONSUMABLE": 5,
             "HDV_ITEM": 5,
-            "HDV_RUNES": 5,
+            "HDV_RUNES": 19,
         }
         nb_loop = nb_loop_mapping.get(HDV_name)
 
         for i in range(1000):
             i += 1
             if i == 1:
-                pyautogui.moveTo(2080, 700, duration=random.uniform(0.1, 0.2))   # Initial mouse position
-            screenshot = pyautogui.screenshot(region=(1270, 680, 2270, 1575))      # Screenshot region
+                pyautogui.moveTo(1080, 460, duration=random.uniform(0.1, 0.2))   # Initial mouse position
+            screenshot = pyautogui.screenshot(region=(850, 455, 670, 600))      # Screenshot region
             screenshot.save(os.path.join(save_path, f"{HDV_name}_{i}.png"))     # Save screenshot
 
             if i <= nb_loop:
@@ -336,9 +360,10 @@ def HDV_Screenshot():
             else:
                 print(f"Screenshot {HDV_name}_{i}")
                 scroll()# Scroll and check for STOP image
-                stopscreenshot = find_and_click_image(img_stop, folder_dir, HDV_name)
+                stopscreenshot = True
                 if stopscreenshot:
                     print(f"Last Screenshot for {HDV_name}")
+                    left_click(1980,332)
                     return True
 
     def scroll():
@@ -358,19 +383,33 @@ def HDV_Screenshot():
         - map_name (str): The name of the current map.
         - main_folder_dir (str): Main directory path for images and folders.
         """
-        if map_name == "COORDINATE_HDV_RUNES":
-            img_name = [
-                "HDV_RUNES",
-                "GRAVURE_Forgemagie",
-                "ORBE_Forgemagie",
-                "POTION_Forgemagie",
-                "RUNE_Astral",
-                "RUNE_Forgemagie",
-                "RUNE_Transcendance",
-            ]
+
+        if map_name == "HDV_RUNES":
+            print("click on hdv")
+            start_pos = pyautogui.position()
+            end_pos = (870,250)
+            move_with_jitter(start_pos, end_pos)
+            time.sleep(random.uniform(0.2, 0.5))
+            real_click(870,250)
+
+            time.sleep(random.uniform(0.2, 0.5))
+            print("active options")
+            left_click(670,575)
+            time.sleep(random.uniform(0.2, 0.5))
+            left_click(670,600)
+            time.sleep(random.uniform(0.2, 0.5))
+            left_click(670,625)
+            time.sleep(random.uniform(0.2, 0.5))
+            left_click(670,650)
+            time.sleep(random.uniform(0.2, 0.5))
+            left_click(670,680)
+            time.sleep(random.uniform(0.2, 0.5))
+            left_click(670,705)
+            time.sleep(random.uniform(0.2, 0.5))
             folder_dir = f"{main_folder_dir}HDV_RUNES\\"
             HDV_name = "HDV_RUNES"
-        if map_name == "COORDINATE_HDV_ITEM":
+
+        if map_name == "HDV_ITEM":
             img_name = [
                 "HDV_ITEM",
                 "ICON_AMULETTE",
@@ -385,7 +424,7 @@ def HDV_Screenshot():
             ]
             folder_dir = f"{main_folder_dir}HDV_ITEM\\"
             HDV_name = "HDV_ITEM"
-        if map_name == "COORDINATE_HDV_CONSUMABLE":
+        if map_name == "HDV_CONSUMABLE":
             img_name = [
                 "HDV_CONSUMABLE",
                 "BALLON",
@@ -421,7 +460,7 @@ def HDV_Screenshot():
             ]
             folder_dir = f"{main_folder_dir}HDV_CONSUMABLE\\"
             HDV_name = "HDV_CONSUMABLE"
-        if map_name == "COORDINATE_HDV_RESOURCES":
+        if map_name == "HDV_RESOURCES":
             img_name = [
                 "HDV_RESOURCES",
                 "AILE",
@@ -485,25 +524,12 @@ def HDV_Screenshot():
             ]
             folder_dir = f"{main_folder_dir}HDV_RESOURCES\\"
             HDV_name = "HDV_RESOURCES"
-        nb_img = len(img_name)
-        i = 0
-        img_stop = f"{folder_dir}STOP.jpg"
-        for name in img_name:
-            i += 1
-            image_paths = [f"{folder_dir}{name}.jpg"]
-            for img_path in image_paths:
-                find_and_click_image(img_path, folder_dir, map_name)
-                if i >= nb_img:
-                    print("All type activated")
-                    break
 
-        if image_paths != f"{folder_dir}{HDV_name}.jpg":
-            time.sleep(random.uniform(0.1, 0.2))
-            all_item = screen_shot_items(img_stop, folder_dir, HDV_name)
-            if all_item:
-                return True
-        else:
-            print(f"Skipping to next image after {name}")
+        time.sleep(random.uniform(0.1, 0.2))
+        all_item = screen_shot_items(folder_dir, HDV_name)
+        if all_item:
+            return True
+
 
     def map(main_folder_dir, folder_dir_tmp, map_name_tmp, starting_map=None):
         """
@@ -512,99 +538,32 @@ def HDV_Screenshot():
         Parameters:
         - current_map (str): The name of the current map being processed.
         """
-        img_name = [
-            "COORDINATE_HDV_RUNES",
-            "COORDINATE_HDV_ITEM",
-            "COORDINATE_HDV_CONSUMABLE",
-            "COORDINATE_HDV_RESOURCES",
+        map_name = [
+            "HDV_RUNES",
+            "HDV_ITEM",
+            "HDV_CONSUMABLE",
+            "HDV_RESOURCES",
         ]
-        folder_dir = f"{main_folder_dir}MAPS\\"
-        for name in img_name:
-            image_paths = [f"{folder_dir}{name}.jpg"]
+
+        for name in map_name:
             map_name = name
 
-            for _ in image_paths:
-                map = coordinate(map_name, folder_dir_tmp, map_name_tmp)
-                if map:
-                    print(f"Proceed for the map : {name.replace('COORDINATE_','')}")
-                    HDV_done = item_type(map_name, main_folder_dir)
-                    if HDV_done:
-                        input("Quitter HDV et aller au next HDV")
-                        print(f"{map_name.replace('COORDINATE_','')} done, proceed to next HDV")
-                        if starting_map is None:
-                            starting_map = start_map(map_name)
-                            map_switch(main_folder_dir,folder_dir_tmp,map_name_tmp,map_name,starting_map,)
-                        else:
-                            map_switch(main_folder_dir,folder_dir_tmp,map_name_tmp,map_name,starting_map,)
+            print(f"Proceed for the map : {name}")
+            HDV_done = item_type(map_name, main_folder_dir)
+            if HDV_done:
+                print("Quitter HDV et aller au next HDV")
+                print(f"{map_name} done, proceed to next HDV")
+                if starting_map is None:
+                    starting_map = start_map(map_name)
+                    map_switch(main_folder_dir,folder_dir_tmp,map_name_tmp,map_name,starting_map,)
                 else:
-                    print("Wrong Map")
-
-    def coordinate(map_name, folder_dir_tmp, map_name_tmp):
-        """
-        Take a screenshot of the player Current map, read it 
-        and compare with given coordinate.
-        Validates the current coordinates of the player in the game.
-
-        Parameters:
-        - current_coordinate (str): The current coordinates of the player.
-        """
-        if map_name == "COORDINATE_HDV_CONSUMABLE":
-            map_coord = ["21", "29"]
-        elif map_name == "COORDINATE_HDV_ITEM":
-            map_coord = ["19", "229"] 
-        elif map_name == "COORDINATE_HDV_RESOURCES":
-            map_coord = ["21", "28"]
-        elif map_name == "COORDINATE_HDV_RUNES":
-            map_coord = ["17", "29"]
-
-        screenshot = pyautogui.screenshot(region=(10, 140, 110, 30))
-        screenshot.save(os.path.join(folder_dir_tmp, f"{map_name_tmp}.jpg"))
-        
-        try:
-            IMAGE1 = os.path.join(folder_dir_tmp, f"{map_name_tmp}.jpg")
-            if not os.path.isfile(IMAGE1):
-                raise FileNotFoundError(f"File not found: {IMAGE1}")
-            
-            img = cv2.imread(IMAGE1)
-            if img is None:
-                raise ValueError(f"Unable to read the image file: {IMAGE1}")
-
-            # Instance Text Detector
-            reader = easyocr.Reader(["fr"], gpu=False)
-            
-            # Detect text on image
-            data = reader.readtext(img)
-            img_coordinates = []
-
-            # Extract the coordinates from OCR result
-            for item in data:
-                # Each item in `data` is a tuple (position, text), e.g., ((x1, y1), (x2, y2), text)
-                text = item[1]  # The text part of the result
-                if text.isdigit():  # Check if the detected text is a number
-                    img_coordinates.append(text)
-
-            print(f"Detected coordinates: {img_coordinates}")
-            
-            # Compare the detected coordinates with the expected map coordinates
-            if img_coordinates == map_coord:
-                print(f"You are on the {map_name.replace('COORDINATE_', '')} map")
-                input("Click to open the HDV and enter continue")
-                return True
-            else:
-                print(f"Coordinates do not match. Expected {map_coord}, but got {img_coordinates}")
-                return False
-                
-        except FileNotFoundError as e:
-            print(e)
-        except ValueError as e:
-            print(e)
+                    map_switch(main_folder_dir,folder_dir_tmp,map_name_tmp,map_name,starting_map,)
 
     def start_map(map_name):
         """
         Initializes the starting map coordinates and actions.
         """
-        # starting_map = f"{map_name.replace('COORDINATE_','')}"
-        starting_map = "HDV_RESOURCES"
+        starting_map = "map_name"
         print(f"Starting map set to: {starting_map}")
         return starting_map
 
@@ -612,8 +571,8 @@ def HDV_Screenshot():
         """
         Switches between different HDV types based on the current state.
         """
-        pyautogui.press("escape")
-        hdv_type = map_name.replace("COORDINATE_", "")
+
+        hdv_type = map_name
         if starting_map == "HDV_RUNES":
             if hdv_type == "HDV_RUNES" or hdv_type == "HDV_ITEM":
                 click_right()
@@ -632,45 +591,79 @@ def HDV_Screenshot():
                 pyautogui.press("escape")
                 print("All 4 HDV screenshot")
                 HDV_Reader()                
-        if starting_map == "HDV_RESOURCES":
-            if hdv_type == "HDV_RESOURCES":
-                click_top()
-                time.sleep(random.uniform(1, 2))
-                loop_main(main_folder_dir, folder_dir_tmp, map_name_tmp, starting_map)
-            if hdv_type == "HDV_CONSUMABLE" or hdv_type == "HDV_ITEM":
-                click_left()
-                time.sleep(random.uniform(15, 20))
-                click_left()
-                time.sleep(random.uniform(15, 20))
-                loop_main(main_folder_dir, folder_dir_tmp, map_name_tmp, starting_map)
-            if hdv_type == "HDV_RUNES":
-                pyautogui.press("escape")
-                print("All 4 HDV screenshot")
-                HDV_Reader()
+
+    def left_click(x, y):
+        win32api.SetCursorPos((x, y))
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
 
     def click_right():
         start_pos = pyautogui.position()
-        end_pos = (1900, random.uniform(700, 1655))
+        end_pos = (2145, random.uniform(70, 1300))
         move_with_jitter(start_pos, end_pos)
-        pyautogui.click()
+        current_pos = pyautogui.position()
+        left_click(current_pos.x, current_pos.y)
 
     def click_left():
         start_pos = pyautogui.position()
         end_pos = (20, random.uniform(300, 1600))
         move_with_jitter(start_pos, end_pos)
-        pyautogui.click()
+        current_pos = pyautogui.position()
+        left_click(current_pos.x, current_pos.y)
 
     def click_top():
         start_pos = pyautogui.position()
         end_pos = (random.uniform(120, 1800), 315)
         move_with_jitter(start_pos, end_pos)
-        pyautogui.click()
+        current_pos = pyautogui.position()
+        left_click(current_pos.x, current_pos.y)
 
     def click_bottom():
         start_pos = pyautogui.position()
         end_pos = (random.uniform(120, 1800), 1650)
         move_with_jitter(start_pos, end_pos)
-        pyautogui.click()
+        current_pos = pyautogui.position()
+        left_click(current_pos.x, current_pos.y)
+
+    def real_click(x, y):
+       # Move cursor with SetCursorPos
+        ctypes.windll.user32.SetCursorPos(x, y)
+        
+        # Add a small random delay to simulate human behavior
+        time.sleep(random.uniform(0.05, 0.15))
+        
+        # Create a pointer for dwExtraInfo (0)
+        extra_info = DWORD(0)
+        p_extra_info = ctypes.pointer(extra_info)
+        
+        # Create input structure for mouse down
+        mouse_down = INPUT()
+        mouse_down.type = INPUT_MOUSE
+        mouse_down.union.mi.dx = 0
+        mouse_down.union.mi.dy = 0
+        mouse_down.union.mi.mouseData = 0
+        mouse_down.union.mi.dwFlags = MOUSEEVENTF_LEFTDOWN
+        mouse_down.union.mi.time = 0
+        mouse_down.union.mi.dwExtraInfo = p_extra_info
+        
+        # Create input structure for mouse up
+        mouse_up = INPUT()
+        mouse_up.type = INPUT_MOUSE
+        mouse_up.union.mi.dx = 0
+        mouse_up.union.mi.dy = 0
+        mouse_up.union.mi.mouseData = 0
+        mouse_up.union.mi.dwFlags = MOUSEEVENTF_LEFTUP
+        mouse_up.union.mi.time = 0
+        mouse_up.union.mi.dwExtraInfo = p_extra_info
+        
+        # Send mouse down event
+        ctypes.windll.user32.SendInput(1, ctypes.byref(mouse_down), ctypes.sizeof(INPUT))
+        
+        # Add a small delay between down and up events
+        time.sleep(random.uniform(0.05, 0.15))
+        
+        # Send mouse up event
+        ctypes.windll.user32.SendInput(1, ctypes.byref(mouse_up), ctypes.sizeof(INPUT))
 
     def loop_main(main_folder_dir, folder_dir_tmp, map_name_tmp, starting_map):
         """
@@ -693,6 +686,8 @@ def HDV_Screenshot():
 
 if __name__ == "__main__":
     try:
+        print(main_folder)
+
         HDV_Screenshot()
         # print("All screenshot done , start post process")
         #HDV_Reader()
