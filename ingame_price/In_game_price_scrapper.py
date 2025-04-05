@@ -12,6 +12,7 @@ import pytesseract as tess
 import ctypes
 from ctypes import wintypes
 from PIL import Image
+from tmp.correction import correction_dict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # from .correction import correction_dict
@@ -87,22 +88,70 @@ def HDV_Reader():
         text = tess.image_to_string(img, config=custom_config)
         
         results = []
-        words = text.splitlines()
-        for line in words:
-            for wrong, correct in correction_dict.items():
-                line = line.replace(wrong, correct)
-            # Find all letters and numbers
-            letters = re.findall(r'[^\d]+', line)  # Extract all non-digit characters
-            numbers = re.findall(r'\d+', line)  # Extract all digit sequences
-
-            # Join letters and numbers into a formatted string
-            letter_part = ''.join(letters).strip()
-            number_part = ' '.join(numbers).replace(" ", "")
-
-            if letter_part and number_part:  # Only print if both parts exist
-                results.append(f"{letter_part}, {number_part}")
+        lines = text.splitlines()
         
-        return results
+        # Filter empty lines and clean up dashes
+        lines = [line.strip() for line in lines if line.strip()]
+        
+        # Pre-process to handle hyphenated words split across lines
+        processed_lines = []
+        i = 0
+        while i < len(lines):
+            line = lines[i]
+            
+            # If line ends with hyphen and there's a next line
+            if i + 1 < len(lines) and line.endswith('-'):
+                # Check if the next line isn't a price-only line
+                if not re.match(r'^[0-9\s]+$', lines[i+1]):
+                    # Combine this line with the next, removing the hyphen
+                    combined = line[:-1] + lines[i+1]
+                    processed_lines.append(combined)
+                    i += 2  # Skip both lines as we've combined them
+                    continue
+            
+            # Clean up any dash markers at the end of text
+            line = re.sub(r'[-—]+\s*$', '', line)
+            processed_lines.append(line)
+            i += 1
+        
+        # Process the cleaned lines
+        i = 0
+        while i < len(processed_lines):
+            line = processed_lines[i]
+            
+            # Clean the line by removing dash markers
+            line = re.sub(r'\s*[-—]+\s*$', '', line)
+            
+            # Extract price if present (numbers at the end of the line)
+            price_match = re.search(r'\d+(?:\s+\d+)*$', line)
+            
+            if price_match:
+                # Line has both item and price
+                item_name = line[:price_match.start()].strip()
+                price = price_match.group().replace(" ", "")
+                    
+                results.append(f"{item_name}, {price}")
+            else:
+                # Check if next line is just a price
+                if i + 1 < len(processed_lines) and re.match(r'^[0-9\s]+$', processed_lines[i+1]):
+                    item_name = line
+                    price = processed_lines[i+1].replace(" ", "")
+                    results.append(f"{item_name}, {price}")
+                    i += 1  # Skip the price line
+                else:
+                    # No price found - mark as N/A
+                    results.append(f"{line}, N/A")
+            
+            i += 1
+        
+        # Apply corrections from dictionary
+        corrected_results = []
+        for result in results:
+            for wrong, correct in correction_dict.items():
+                result = result.replace(wrong, correct)
+            corrected_results.append(result)
+        
+        return corrected_results
 
     def screenshot_reader(user_input):
         """Read images and extract text using multithreading."""
@@ -140,8 +189,9 @@ def HDV_Reader():
 
     def blackout(IMAGE1, blackout_folder):
         """Blackout specific regions of the image."""
-        region1 = (350, 0, 610, 1000)
-        region2 = (775, 0, 825, 1000)
+        region1 = (245, 0, 450, 1000)
+        region2 = (0, 0, 40, 1000)
+        region3 = (610, 0, 670, 1000)
 
         try:
             img = Image.open(IMAGE1)
@@ -152,6 +202,7 @@ def HDV_Reader():
             # Apply blackouts using numpy slicing
             img_array[region1[1]:region1[3], region1[0]:region1[2]] = 0  # Blackout first region
             img_array[region2[1]:region2[3], region2[0]:region2[2]] = 0  # Blackout second region
+            img_array[region3[1]:region3[3], region3[0]:region3[2]] = 0  # Blackout third region
 
             os.makedirs(blackout_folder, exist_ok=True)
             blackout_path = os.path.join(blackout_folder, f"BLACKOUT_{os.path.basename(IMAGE1)}")
@@ -167,7 +218,7 @@ def HDV_Reader():
             print(f"Error processing image: {e}")
 
     def main_screenshot_reader():
-        user_input = "y" #input("Do you want to Blackout the screenshot ? (y/n)")
+        user_input = input("Do you want to Blackout the screenshot ? (y/n)")
         screenshot_reader(user_input)
 
     main_screenshot_reader()
@@ -635,14 +686,12 @@ def HDV_Screenshot():
     start_time = time.time()
     main_bot()
     
-
-
 if __name__ == "__main__":
     try:
 
         # Execute screenshot function
-        HDV_Screenshot()
+        # HDV_Screenshot()
 
-        #HDV_Reader()
+        HDV_Reader()
     except KeyboardInterrupt:
         print("\nScript stopped with Ctrl + C.")

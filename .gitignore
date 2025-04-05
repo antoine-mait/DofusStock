@@ -13,6 +13,7 @@ __pycache__/
 dofustock_project/settings_local.py
 */correction.py
 *HDV_IMG/
+*/tmp
 
 # Database
 *.sqlite3
