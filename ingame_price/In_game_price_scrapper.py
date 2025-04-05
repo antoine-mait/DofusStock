@@ -1,8 +1,6 @@
 import pyautogui
 import random
 import time
-import cv2
-import easyocr
 import numpy as np
 import os
 import re
@@ -10,7 +8,7 @@ import win32api
 import win32con
 import pytesseract as tess
 import ctypes
-from ctypes import wintypes
+import cv2
 from PIL import Image
 from tmp.correction import correction_dict
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -84,7 +82,7 @@ def HDV_Reader():
         # Instance Text Detector
         img = img.convert('L')  # Convert to grayscale
         img = img.point(lambda x: 0 if x < 128 else 255, '1') 
-        custom_config = r'--oem 3 --psm 6 -l fra'
+        custom_config = r'--oem 3 --psm 4 -l fra'
         text = tess.image_to_string(img, config=custom_config)
         
         results = []
@@ -129,6 +127,7 @@ def HDV_Reader():
                 # Line has both item and price
                 item_name = line[:price_match.start()].strip()
                 price = price_match.group().replace(" ", "")
+                
                     
                 results.append(f"{item_name}, {price}")
             else:
@@ -209,7 +208,7 @@ def HDV_Reader():
             
             # Convert back to an Image object and save
             Image.fromarray(img_array).save(blackout_path)
-            print(f"Image saved to {blackout_path}")
+
             return blackout_path
 
         except KeyboardInterrupt:
@@ -218,7 +217,7 @@ def HDV_Reader():
             print(f"Error processing image: {e}")
 
     def main_screenshot_reader():
-        user_input = input("Do you want to Blackout the screenshot ? (y/n)")
+        user_input = "y" #input("Do you want to Blackout the screenshot ? (y/n)")
         screenshot_reader(user_input)
 
     main_screenshot_reader()
