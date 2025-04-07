@@ -9,6 +9,8 @@ import win32con
 import pytesseract as tess
 import ctypes
 import cv2
+import pandas as pd
+import pytesseract
 from PIL import Image
 from tmp.correction import correction_dict
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -52,6 +54,7 @@ MOUSEEVENTF_LEFTDOWN = 0x0002
 MOUSEEVENTF_LEFTUP = 0x0004
 INPUT_MOUSE = 0
 
+
 def HDV_Reader():
     """
     Processes images of market prices for items in the game Dofus.
@@ -67,124 +70,6 @@ def HDV_Reader():
     - `blackout`: Obscures specific regions of the image.
     - `main_screenshot_reader`: Initiates the screenshot reading process based on user input (Optionnal).
     """
-    def process_image(IMAGE1, user_input, blackout_folder):
-        """Process a single image: blackout if needed, extract text."""
-        if user_input == "y":
-            blackout_img = blackout(IMAGE1, blackout_folder)
-            img = Image.open(blackout_img)
-            if img is None:
-                print(f"Failed to load image: {blackout_img}")
-                return None
-        else:
-            check_blackout_img = os.path.join(blackout_folder, f"BLACKOUT_{os.path.basename(IMAGE1)}")
-            img = Image.open(check_blackout_img)
-        
-        # Instance Text Detector
-        img = img.convert('L')  # Convert to grayscale
-        img = img.point(lambda x: 0 if x < 128 else 255, '1') 
-        custom_config = r'--oem 3 --psm 4 -l fra'
-        text = tess.image_to_string(img, config=custom_config)
-        
-        results = []
-        lines = text.splitlines()
-        
-        # Filter empty lines and clean up dashes
-        lines = [line.strip() for line in lines if line.strip()]
-        
-        # Pre-process to handle hyphenated words split across lines
-        processed_lines = []
-        i = 0
-        while i < len(lines):
-            line = lines[i]
-            
-            # If line ends with hyphen and there's a next line
-            if i + 1 < len(lines) and line.endswith('-'):
-                # Check if the next line isn't a price-only line
-                if not re.match(r'^[0-9\s]+$', lines[i+1]):
-                    # Combine this line with the next, removing the hyphen
-                    combined = line[:-1] + lines[i+1]
-                    processed_lines.append(combined)
-                    i += 2  # Skip both lines as we've combined them
-                    continue
-            
-            # Clean up any dash markers at the end of text
-            line = re.sub(r'[-—]+\s*$', '', line)
-            processed_lines.append(line)
-            i += 1
-        
-        # Process the cleaned lines
-        i = 0
-        while i < len(processed_lines):
-            line = processed_lines[i]
-            
-            # Clean the line by removing dash markers
-            line = re.sub(r'\s*[-—]+\s*$', '', line)
-            
-            # Extract price if present (numbers at the end of the line)
-            price_match = re.search(r'\d+(?:\s+\d+)*$', line)
-            
-            if price_match:
-                # Line has both item and price
-                item_name = line[:price_match.start()].strip()
-                price = price_match.group().replace(" ", "")
-                
-                    
-                results.append(f"{item_name}, {price}")
-            else:
-                # Check if next line is just a price
-                if i + 1 < len(processed_lines) and re.match(r'^[0-9\s]+$', processed_lines[i+1]):
-                    item_name = line
-                    price = processed_lines[i+1].replace(" ", "")
-                    results.append(f"{item_name}, {price}")
-                    i += 1  # Skip the price line
-                else:
-                    # No price found - mark as N/A
-                    results.append(f"{line}, N/A")
-            
-            i += 1
-        
-        # Apply corrections from dictionary
-        corrected_results = []
-        for result in results:
-            for wrong, correct in correction_dict.items():
-                result = result.replace(wrong, correct)
-            corrected_results.append(result)
-        
-        return corrected_results
-
-    def screenshot_reader(user_input):
-        """Read images and extract text using multithreading."""
-        all_results = []
-
-        for directory in ["HDV_CONSUMABLE", "HDV_ITEM", "HDV_RESOURCES", "HDV_RUNES"]:
-            print(f"Processing img in {directory} folder")
-            path = os.path.join(main_folder, f"{directory}", f"{directory}_PRICE_IMG")  # Construct the full path
-
-            image_files = [f for f in os.listdir(path) if f.endswith('.png')]
-            IMAGES_Path = path
-            blackout_folder = os.path.join(IMAGES_Path, "BLACKOUT_PRICE")
-
-            with ThreadPoolExecutor() as executor:
-                future_to_image = {}
-                future_to_image = ({executor.submit(process_image, 
-                                                    os.path.join(IMAGES_Path, f"{directory}_{i}.png"), 
-                                                    user_input, blackout_folder):
-                                                      i for i in range(1, len(image_files) + 1)})
-                for future in as_completed(future_to_image):
-                    try:
-                        results = future.result()
-                        if results:
-                            all_results.extend(results)
-                    except Exception as e:
-                        print(f"Error processing image: {e}")
-
-        # Print all results after processing
-        dir_path = os.path.join("tmp","HDV_Price.txt")
-        with open(dir_path, "w" , encoding="utf-8") as file:
-            for results in all_results : 
-                file.write(f"{results}\n")
-
-        print(f"All price written on {dir_path}")
 
     def blackout(IMAGE1, blackout_folder):
         """Blackout specific regions of the image."""
@@ -216,11 +101,100 @@ def HDV_Reader():
         except Exception as e:
             print(f"Error processing image: {e}")
 
-    def main_screenshot_reader():
-        user_input = "y" #input("Do you want to Blackout the screenshot ? (y/n)")
-        screenshot_reader(user_input)
+    def extract_items_data(IMAGE1 , user_input , blackout_folder):
+        """Process a single image: blackout if needed, extract text."""
+        if user_input == "y":
+            blackout_img = blackout(IMAGE1, blackout_folder)
+            img = cv2.imread(blackout_img)
+            if img is None:
+                print(f"Failed to load image: {blackout_img}")
+                return None
+        else:
+            check_blackout_img = os.path.join(blackout_folder, f"BLACKOUT_{os.path.basename(IMAGE1)}")
+            img = cv2.imread(check_blackout_img)
+        
+        # Convert to grayscale
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        
+        # Apply thresholding to get clearer text
+        _, img = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)
+        
+        # Use pytesseract to extract text
+        custom_config = r'--oem 3 --psm 4 -l fra'
+        text = tess.image_to_string(img, config=custom_config)
+        
+        # Process the text to extract items and values
+        lines = text.strip().split('\n')
+        
+        items_data = []
+        
+        for line in lines:
+            if not line.strip():
+                continue
+                
+            # Split each line into item name and value
+            parts = line.strip().split('  ')
+            parts = [p for p in parts if p.strip()]
+            
+            if len(parts) >= 2:
+                item_name = parts[0].strip()
+                value = parts[-1].strip()
+                items_data.append({'Item': item_name, 'Value': value})
+            elif len(parts) == 1 and parts[0].strip():
+                # Handle cases where there might be only one part
+                item_name = parts[0].strip()
+                value = ""
+                items_data.append({'Item': item_name, 'Value': value})
+        
+        # Convert to DataFrame
+        df = pd.DataFrame(items_data)
 
-    main_screenshot_reader()
+        return df
+
+    def main():
+        """Read images and extract text using multithreading."""
+        user_input = "y" #input("Do you want to Blackout the screenshot ? (y/n)")
+        all_results = []
+
+        for directory in ["HDV_CONSUMABLE", "HDV_ITEM", "HDV_RESOURCES", "HDV_RUNES"]:
+            print(f"Processing img in {directory} folder")
+            path = os.path.join(main_folder, f"{directory}", f"{directory}_PRICE_IMG")  # Construct the full path
+
+            image_files = [f for f in os.listdir(path) if f.endswith('.png')]
+            IMAGES_Path = path
+            blackout_folder = os.path.join(IMAGES_Path, "BLACKOUT_PRICE")
+
+            with ThreadPoolExecutor() as executor:
+                future_to_image = {
+                    executor.submit(
+                        extract_items_data, 
+                        os.path.join(IMAGES_Path, f"{directory}_{i}.png"), 
+                        user_input, 
+                        blackout_folder
+                    ): i for i in range(1, len(image_files) + 1)
+                }
+                
+                for future in as_completed(future_to_image):
+                    try:
+                        results = future.result()
+                        if results is not None:
+                            all_results.append(results)  # Append DataFrame instead of extending
+                    except Exception as e:
+                        print(f"Error processing image: {e}")
+
+        # Combine all DataFrames
+        if all_results:
+            final_df = pd.concat(all_results, ignore_index=True)
+            
+            # Save to CSV
+            dir_path = os.path.join("tmp", "HDV_Price.csv")
+            final_df.to_csv(dir_path, index=False, encoding="utf-8")
+            
+            print(f"Data has been saved to {dir_path}")
+        else:
+            print("No data was extracted")
+            
+    main()
 
 def HDV_Screenshot():
     """
