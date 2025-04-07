@@ -6,6 +6,7 @@ import os
 import re
 import unicodedata
 from dotenv import load_dotenv
+from tmp.correction import correction_dict
 
 load_dotenv()
 main_folder= os.environ.get("MAIN_IMG_FOLDER")
@@ -90,7 +91,6 @@ def extract_items_data(image_path):
         left_side_text = []
         right_side_text = []
         
-        
         for item in row:
             if item['left'] < column_boundary:
                 left_side_text.append(item['text'])
@@ -98,19 +98,20 @@ def extract_items_data(image_path):
                 right_side_text.append(item['text'])
         
         item_text = " ".join(left_side_text).strip()
+
         price_text = " ".join(right_side_text).strip()
         
         # Clean up price text - keep only numbers and separators
         if price_text:
             # Remove any non-numeric characters except spaces and common separators
             price_text = re.sub(r'[^0-9\s.,]', '', price_text).strip()
-        
-        # Add the item if we have text
+
         if item_text or price_text:
-            items_data.append({'Item': item_text, 'Price': price_text})
+            items_data.append({'Item': sanitize_filename(item_text), 'Price': price_text})
     
     # Convert to DataFrame
     df = pd.DataFrame(items_data)
+
     return df
 
 def extract_text_regions(image_path, output_folder):
@@ -238,8 +239,15 @@ def main():
             # For subsequent images, append to the dataframe
             items_df = pd.concat([items_df, extract_items_data(img_path)], ignore_index=True)
     
+
     dir_path = os.path.join("tmp", "HDV_Price_test.csv")
-    items_df.to_csv(dir_path, index=False)
+    df = pd.read_csv(dir_path)
+
+    df['Item'] = df['Item'].apply(
+    lambda item: next((item.replace(wrong, correct) for wrong, correct in correction_dict.items() if wrong in item), item))
+
+    output_path = os.path.join("tmp", "HDV_Price_test.csv")
+    df.to_csv(output_path, index=False)
     
 if __name__ == "__main__":
     main()
