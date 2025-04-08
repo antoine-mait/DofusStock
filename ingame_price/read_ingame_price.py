@@ -25,95 +25,6 @@ def sanitize_filename(filename):
     
     return sanitized
 
-def extract_items_data(image_path):
-    # Read the image
-    img = cv2.imread(image_path)
-    
-    # Convert to grayscale
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    
-    # Apply thresholding to get clearer text
-    _, img = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)
-    
-    # Use pytesseract to get bounding boxes of text with coordinates
-    custom_config = r'--oem 3 --psm 6 -l fra'
-    boxes = tess.image_to_data(img, config=custom_config, output_type=tess.Output.DICT)
-    
-    # Prepare data structure to hold text by position
-    lines_data = []
-    
-    # Process text with position information
-    for i in range(len(boxes['text'])):
-        if boxes['text'][i].strip():
-            lines_data.append({
-                'text': boxes['text'][i],
-                'left': boxes['left'][i],
-                'top': boxes['top'][i],
-                'width': boxes['width'][i],
-                'height': boxes['height'][i],
-                'conf': boxes['conf'][i]
-            })
-    
-    # Sort by vertical position (top)
-    lines_data.sort(key=lambda x: x['top'])
-    
-    # Identify rows based on vertical position
-    rows = []
-    current_row = []
-    last_top = -1
-    vertical_threshold = 20  # Adjust this based on your image
-    
-    for line in lines_data:
-        if last_top == -1 or abs(line['top'] - last_top) < vertical_threshold:
-            current_row.append(line)
-        else:
-            # New row
-            if current_row:
-                rows.append(current_row)
-            current_row = [line]
-        last_top = line['top']
-    
-    # Add the last row
-    if current_row:
-        rows.append(current_row)
-    
-    # Identify items and prices from each row
-    items_data = []
-    
-    # Determine the boundary between item and price columns
-    img_width = img.shape[1]
-    column_boundary = img_width * 0.6  # Adjust this threshold based on your image layout
-    
-    for i, row in enumerate(rows):
-        # Sort each row by horizontal position
-        row.sort(key=lambda x: x['top'])
-        
-        left_side_text = []
-        right_side_text = []
-        
-        for item in row:
-            if item['left'] < column_boundary:
-                left_side_text.append(item['text'])
-            else:
-                right_side_text.append(item['text'])
-        
-        item_text = " ".join(left_side_text).strip()
-
-        price_text = " ".join(right_side_text).strip()
-        
-        # Clean up price text - keep only numbers and separators
-        if price_text:
-            # Remove any non-numeric characters except spaces and common separators
-            price_text = re.sub(r'[^0-9\s.,]', '', price_text).strip()
-
-        if item_text or price_text:
-            items_data.append({'Item': sanitize_filename(item_text), 'Price': price_text})
-    
-    # Convert to DataFrame
-    df = pd.DataFrame(items_data)
-
-    return df
-
 def extract_text_regions(image_path, output_folder):
     """Extract text regions from the image and save them to a folder,
     avoiding duplicate text content and close rows"""
@@ -219,6 +130,95 @@ def extract_text_regions(image_path, output_folder):
     print(f"Extracted {len(saved_regions)} text regions to {output_folder}")
     return saved_regions
 
+def extract_items_data(image_path):
+    # Read the image
+    img = cv2.imread(image_path)
+    
+    # Convert to grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    
+    # Apply thresholding to get clearer text
+    _, img = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)
+    
+    # Use pytesseract to get bounding boxes of text with coordinates
+    custom_config = r'--oem 3 --psm 6 -l fra'
+    boxes = tess.image_to_data(img, config=custom_config, output_type=tess.Output.DICT)
+    
+    # Prepare data structure to hold text by position
+    lines_data = []
+    
+    # Process text with position information
+    for i in range(len(boxes['text'])):
+        if boxes['text'][i].strip():
+            lines_data.append({
+                'text': boxes['text'][i],
+                'left': boxes['left'][i],
+                'top': boxes['top'][i],
+                'width': boxes['width'][i],
+                'height': boxes['height'][i],
+                'conf': boxes['conf'][i]
+            })
+    
+    # Sort by vertical position (top)
+    lines_data.sort(key=lambda x: x['top'])
+    
+    # Identify rows based on vertical position
+    rows = []
+    current_row = []
+    last_top = -1
+    vertical_threshold = 20  # Adjust this based on your image
+    
+    for line in lines_data:
+        if last_top == -1 or abs(line['top'] - last_top) < vertical_threshold:
+            current_row.append(line)
+        else:
+            # New row
+            if current_row:
+                rows.append(current_row)
+            current_row = [line]
+        last_top = line['top']
+    
+    # Add the last row
+    if current_row:
+        rows.append(current_row)
+    
+    # Identify items and prices from each row
+    items_data = []
+    
+    # Determine the boundary between item and price columns
+    img_width = img.shape[1]
+    column_boundary = img_width * 0.6  # Adjust this threshold based on your image layout
+    
+    for i, row in enumerate(rows):
+        # Sort each row by horizontal position
+        row.sort(key=lambda x: x['top'])
+        
+        left_side_text = []
+        right_side_text = []
+        
+        for item in row:
+            if item['left'] < column_boundary:
+                left_side_text.append(item['text'])
+            else:
+                right_side_text.append(item['text'])
+        
+        item_text = " ".join(left_side_text).strip()
+
+        price_text = " ".join(right_side_text).strip()
+        
+        # Clean up price text - keep only numbers and separators
+        if price_text:
+            # Remove any non-numeric characters except spaces and common separators
+            price_text = re.sub(r'[^0-9\s.,]', '', price_text).strip()
+
+        if item_text or price_text:
+            items_data.append({'Item': sanitize_filename(item_text), 'Price': price_text})
+    
+    # Convert to DataFrame
+    df = pd.DataFrame(items_data)
+
+    return df
+
 def main():
     # Use main_folder in all path constructions
     path = os.path.join(main_folder, "HDV_CONSUMABLE", "HDV_CONSUMABLE_PRICE_IMG", "BLACKOUT_PRICE", "BLACKOUT_HDV_CONSUMABLE_1.png")
@@ -238,16 +238,26 @@ def main():
         else:
             # For subsequent images, append to the dataframe
             items_df = pd.concat([items_df, extract_items_data(img_path)], ignore_index=True)
-    
 
     dir_path = os.path.join("tmp", "HDV_Price_test.csv")
-    df = pd.read_csv(dir_path)
+    
+    if os.path.isfile(dir_path):
+        # Combine with new data
+        combined_df = pd.concat([items_df], ignore_index=True)
 
-    df['Item'] = df['Item'].apply(
-    lambda item: next((item.replace(wrong, correct) for wrong, correct in correction_dict.items() if wrong in item), item))
+    else:
+        # No existing file, just use the extracted data
+        os.makedirs(os.path.dirname(dir_path), exist_ok=True)
+        combined_df = items_df
 
+    # Apply your transformation
+    if 'Item' in combined_df.columns:
+        combined_df['Item'] = combined_df['Item'].apply(
+            lambda item: next((item.replace(wrong, correct) for wrong, correct in correction_dict.items() if wrong in item), item) if isinstance(item, str) else item)
+
+    # Save to CSV
     output_path = os.path.join("tmp", "HDV_Price_test.csv")
-    df.to_csv(output_path, index=False)
+    combined_df.to_csv(output_path, index=False)
     
 if __name__ == "__main__":
     main()
