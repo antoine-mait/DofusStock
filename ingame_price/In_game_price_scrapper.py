@@ -3,19 +3,12 @@ import random
 import time
 import numpy as np
 import os
-import re
 import win32api
 import win32con
-import pytesseract as tess
 import ctypes
-import cv2
-import pandas as pd
-import pytesseract
+import concurrent.futures
 from PIL import Image
-from tmp.correction import correction_dict
-from concurrent.futures import ThreadPoolExecutor, as_completed
-
-# from .correction import correction_dict
+from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 
 
@@ -55,23 +48,10 @@ MOUSEEVENTF_LEFTUP = 0x0004
 INPUT_MOUSE = 0
 
 
-def HDV_Reader():
-    """
-    Processes images of market prices for items in the game Dofus.
-
-    This function reads images from specified directories, optionally applies a blackout effect to 
-    obscure certain areas, and extracts text using Tesseract (Tess) for Optical Character Recognition (OCR). 
-    The extracted text is corrected based on a predefined dictionary and saved to a text file.
-
-    The process is divided into several internal functions:
-    - `process_image`: Applies blackout to images and extracts text using Tesseract OCR.
-    - `screenshot_reader`: Reads images from directories, processes them in parallel, 
-      and compiles the results into a text file.
-    - `blackout`: Obscures specific regions of the image.
-    - `main_screenshot_reader`: Initiates the screenshot reading process based on user input (Optionnal).
-    """
+def IMG_Blackout():
 
     def blackout(IMAGE1, blackout_folder):
+        
         """Blackout specific regions of the image."""
         region1 = (245, 0, 450, 1000)
         region2 = (0, 0, 40, 1000)
@@ -101,99 +81,40 @@ def HDV_Reader():
         except Exception as e:
             print(f"Error processing image: {e}")
 
-    def extract_items_data(IMAGE1 , user_input , blackout_folder):
-        """Process a single image: blackout if needed, extract text."""
-        if user_input == "y":
-            blackout_img = blackout(IMAGE1, blackout_folder)
-            img = cv2.imread(blackout_img)
-            if img is None:
-                print(f"Failed to load image: {blackout_img}")
-                return None
-        else:
-            check_blackout_img = os.path.join(blackout_folder, f"BLACKOUT_{os.path.basename(IMAGE1)}")
-            img = cv2.imread(check_blackout_img)
-        
-        # Convert to grayscale
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        
-        # Apply thresholding to get clearer text
-        _, img = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)
-        
-        # Use pytesseract to extract text
-        custom_config = r'--oem 3 --psm 4 -l fra'
-        text = tess.image_to_string(img, config=custom_config)
-        
-        # Process the text to extract items and values
-        lines = text.strip().split('\n')
-        
-        items_data = []
-        
-        for line in lines:
-            if not line.strip():
-                continue
-                
-            # Split each line into item name and value
-            parts = line.strip().split('  ')
-            parts = [p for p in parts if p.strip()]
-            
-            if len(parts) >= 2:
-                item_name = parts[0].strip()
-                value = parts[-1].strip()
-                items_data.append({'Item': item_name, 'Value': value})
-            elif len(parts) == 1 and parts[0].strip():
-                # Handle cases where there might be only one part
-                item_name = parts[0].strip()
-                value = ""
-                items_data.append({'Item': item_name, 'Value': value})
-        
-        # Convert to DataFrame
-        df = pd.DataFrame(items_data)
-
-        return df
 
     def main():
-        """Read images and extract text using multithreading."""
+        """Blackout region to help OCR reading later."""
         user_input = "y" #input("Do you want to Blackout the screenshot ? (y/n)")
         all_results = []
 
-        for directory in ["HDV_CONSUMABLE", "HDV_ITEM", "HDV_RESOURCES", "HDV_RUNES"]:
-            print(f"Processing img in {directory} folder")
-            path = os.path.join(main_folder, f"{directory}", f"{directory}_PRICE_IMG")  # Construct the full path
+        if user_input == "y":
+            for directory in ["HDV_CONSUMABLE", "HDV_ITEM", "HDV_RESOURCES", "HDV_RUNES"]:
+                print(f"Processing img in {directory} folder")
+                path = os.path.join(main_folder, f"{directory}", f"{directory}_PRICE_IMG")
 
-            image_files = [f for f in os.listdir(path) if f.endswith('.png')]
-            IMAGES_Path = path
-            blackout_folder = os.path.join(IMAGES_Path, "BLACKOUT_PRICE")
+                blackout_folder = os.path.join(main_folder, f"{directory}", "BLACKOUT_PRICE")
 
-            with ThreadPoolExecutor() as executor:
-                future_to_image = {
-                    executor.submit(
-                        extract_items_data, 
-                        os.path.join(IMAGES_Path, f"{directory}_{i}.png"), 
-                        user_input, 
-                        blackout_folder
-                    ): i for i in range(1, len(image_files) + 1)
-                }
+                image_files = [os.path.join(path, f) for f in os.listdir(path) 
+                              if os.path.isfile(os.path.join(path, f))]
                 
-                for future in as_completed(future_to_image):
-                    try:
-                        results = future.result()
-                        if results is not None:
-                            all_results.append(results)  # Append DataFrame instead of extending
-                    except Exception as e:
-                        print(f"Error processing image: {e}")
-
-        # Combine all DataFrames
-        if all_results:
-            final_df = pd.concat(all_results, ignore_index=True)
+                # Create a thread pool and process all images
+                with ThreadPoolExecutor() as executor:
+                    # Submit each image to the thread pool
+                    futures = [executor.submit(blackout, img_path, blackout_folder) for img_path in image_files]
+                    
+                    # Wait for all tasks to complete and collect results
+                    for future in concurrent.futures.as_completed(futures):
+                        try:
+                            result = future.result()
+                            if result:  # Only add non-None results
+                                all_results.append(result)
+                        except Exception as e:
+                            print(f"Task generated an exception: {e}")
+                
+                print(f"Completed processing {len(image_files)} images in {directory}")
             
-            # Save to CSV
-            dir_path = os.path.join("tmp", "HDV_Price.csv")
-            final_df.to_csv(dir_path, index=False, encoding="utf-8")
-            
-            print(f"Data has been saved to {dir_path}")
-        else:
-            print("No data was extracted")
-            
+            print(f"Total processed images: {len(all_results)}")
+    
     main()
 
 def HDV_Screenshot():
@@ -665,6 +586,6 @@ if __name__ == "__main__":
         # Execute screenshot function
         # HDV_Screenshot()
 
-        HDV_Reader()
+        IMG_Blackout()
     except KeyboardInterrupt:
         print("\nScript stopped with Ctrl + C.")
