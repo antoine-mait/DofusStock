@@ -7,6 +7,7 @@ import win32api
 import win32con
 import ctypes
 import concurrent.futures
+import cv2
 from PIL import Image
 from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
@@ -50,10 +51,56 @@ INPUT_MOUSE = 0
 
 def IMG_Blackout():
 
-    def blackout(IMAGE1, blackout_folder):
+    def detect_and_blackout_panoplie_icons(img_array, template_path):
+        """Detect panoplie icons using template matching and blackout them."""
+        try:
+            # Convert template to numpy array
+            template = np.array(Image.open(template_path))
+            
+            # Get image dimensions to ensure we don't go out of bounds
+            img_height, img_width = img_array.shape[:2]
+            
+            # Define the specific region to search (x, y, width, height)
+            # Adjusted to look at the right side of the item names
+            search_region = (230, 0, 50, min(1000, img_height))
+            
+            # Extract the region to search
+            region_to_search = img_array[search_region[1]:search_region[1]+search_region[3], 
+                                         search_region[0]:search_region[0]+search_region[2]]
+            
+            # Convert both images to grayscale for template matching
+            region_gray = cv2.cvtColor(region_to_search, cv2.COLOR_RGB2GRAY)
+            template_gray = cv2.cvtColor(template, cv2.COLOR_RGB2GRAY)
+            
+            # Perform template matching
+            result = cv2.matchTemplate(region_gray, template_gray, cv2.TM_CCOEFF_NORMED)
+
+            # Set threshold for matches
+            threshold = 0.35
+            loc = np.where(result >= threshold)
+            
+            # Get template dimensions
+            h, w = template_gray.shape
+            
+             # Blackout all matches within the region
+            for pt in zip(*loc[::-1]):
+                # Calculate coordinates in the original image
+                original_x = pt[0] + search_region[0]
+                original_y = pt[1] + search_region[1]
+                
+                # Blackout the detected area in the original image
+                img_array[original_y:original_y + h, original_x:original_x + w] = 0
+
+            return img_array
+            
+        except Exception as e:
+            print(f"Error detecting panoplie icons: {e}")
+            return img_array
+
+    def blackout(IMAGE1, blackout_folder, template_path, directory):
         
         """Blackout specific regions of the image."""
-        region1 = (245, 0, 450, 1000)
+        region1 = (250, 0, 450, 1000)
         region2 = (0, 0, 40, 1000)
         region3 = (610, 0, 670, 1000)
 
@@ -68,6 +115,9 @@ def IMG_Blackout():
             img_array[region2[1]:region2[3], region2[0]:region2[2]] = 0  # Blackout second region
             img_array[region3[1]:region3[3], region3[0]:region3[2]] = 0  # Blackout third region
 
+            if directory == "HDV_ITEM":
+                img_array = detect_and_blackout_panoplie_icons(img_array, template_path) #icon pos
+
             os.makedirs(blackout_folder, exist_ok=True)
             blackout_path = os.path.join(blackout_folder, f"BLACKOUT_{os.path.basename(IMAGE1)}")
             
@@ -81,11 +131,17 @@ def IMG_Blackout():
         except Exception as e:
             print(f"Error processing image: {e}")
 
-
     def main():
         """Blackout region to help OCR reading later."""
         user_input = "y" #input("Do you want to Blackout the screenshot ? (y/n)")
         all_results = []
+
+        template_path = os.path.join(tmp_folder, 'panoplie_icon.jpg')
+
+        # Check if template exists
+        if not os.path.exists(template_path):
+            print(f"Warning: Template file not found at {template_path}")
+            template_path = None  # Skip template matching if file doesn't exist
 
         if user_input == "y":
             for directory in ["HDV_CONSUMABLE", "HDV_ITEM", "HDV_RESOURCES", "HDV_RUNES"]:
@@ -100,8 +156,8 @@ def IMG_Blackout():
                 # Create a thread pool and process all images
                 with ThreadPoolExecutor() as executor:
                     # Submit each image to the thread pool
-                    futures = [executor.submit(blackout, img_path, blackout_folder) for img_path in image_files]
-                    
+                    futures = [executor.submit(blackout, img_path, blackout_folder, template_path , directory) for img_path in image_files]
+
                     # Wait for all tasks to complete and collect results
                     for future in concurrent.futures.as_completed(futures):
                         try:
@@ -587,5 +643,6 @@ if __name__ == "__main__":
         # HDV_Screenshot()
 
         IMG_Blackout()
+
     except KeyboardInterrupt:
         print("\nScript stopped with Ctrl + C.")

@@ -186,8 +186,9 @@ def extract_items_data(image_path):
             item_texts.append(block['text'])
     
     # Combine text blocks to form item name and price
-    item_name = " ".join(item_texts).strip()
+    item_name = " ".join(item_texts).strip().title()
     price_text = " ".join(price_texts).strip()
+    price_text = re.sub(r'[a-zA-Z]', '', price_text)
     
     # Create DataFrame
     items_data = [{'Item': sanitize_filename(item_name), 'Price': price_text}]
@@ -209,6 +210,19 @@ def process_directory(directory , user_input_slice , user_input_all):
     
     # Ensure the output directory exists
     os.makedirs(output_base, exist_ok=True)
+    
+    # Delete all existing images in the output folder if user wants to slice images
+    if user_input_slice == "y":
+        if os.path.exists(output_base):
+            import shutil
+            shutil.rmtree(output_base)
+        
+            # Create a fresh output directory
+            os.makedirs(output_base)
+
+        else:
+            # Just ensure the output directory exists
+            os.makedirs(output_base, exist_ok=True)
     
     # Get all PNG images in the directory
     image_files = glob.glob(os.path.join(input_path, "*.png"))
@@ -255,8 +269,12 @@ def process_directory(directory , user_input_slice , user_input_all):
         # Save results
         if user_input_all == "y":
             output_path = os.path.join(tmp_folder, f"{directory}_Price.csv")
+            if os.path.exists(output_path):
+                os.remove(output_path)
         else:
             output_path = os.path.join(tmp_folder, f"test_Price.csv")
+            if os.path.exists(output_path):
+                os.remove(output_path)
 
         combined_df.to_csv(output_path, index=False)
 
@@ -304,6 +322,9 @@ def main():
         
         # Save combined results
         final_output_path = os.path.join(tmp_folder, "ALL_HDV_Prices.csv")
+        if os.path.exists(final_output_path):
+            os.remove(final_output_path)
+
         final_df.to_csv(final_output_path, index=False)
         print(f"Saved combined results with {len(final_df)} items to {final_output_path}")
     
