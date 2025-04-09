@@ -1,23 +1,36 @@
 // encyclopedia.js - Item search and browsing
 function initEncyclopedia() {
-    // Search input event listener
-    let searchTimeout;
+    // Get search input element directly when function is called
+    window.searchInput = document.getElementById('item-search');
+    window.itemTypeContainer = document.getElementById('item-type-container');
+    window.itemContainer = document.getElementById('item-container');
+    
+    // Only add event listener if search input exists
     if (window.searchInput) {
+        console.log("Search input found, adding event listener");
+        
+        // Search input event listener
+        let searchTimeout;
         window.searchInput.addEventListener('input', () => {
             // Clear any existing timeout
             clearTimeout(searchTimeout);
-        
+            
             // Set a new timeout to prevent too many requests
             searchTimeout = setTimeout(performGlobalSearch, 300);
         });
+    } else {
+        console.error("Search input element not found");
     }
     
-    // Add click event to category buttons to reset search
+    // Add click event to category buttons
+    window.categoryButtons = document.querySelectorAll('.category-button');
     if (window.categoryButtons) {
         window.categoryButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const category = button.dataset.category;
-                window.searchInput.value = ''; // Clear search input
+                if (window.searchInput) {
+                    window.searchInput.value = ''; // Clear search input
+                }
                 fetchItemTypes(category);
             });
         });
@@ -26,19 +39,31 @@ function initEncyclopedia() {
 
 // Global search function
 async function performGlobalSearch() {
-    const searchTerm = window.searchInput.value.trim();
+    const searchInput = document.getElementById('item-search');
+    if (!searchInput) {
+        console.error("Search input not found");
+        return;
+    }
+    
+    const searchTerm = searchInput.value.trim();
+    const itemContainer = document.getElementById('item-container');
+    const itemTypeContainer = document.getElementById('item-type-container');
     
     // Clear previous content
-    window.itemTypeContainer.innerHTML = '';
-    window.itemContainer.innerHTML = '';
+    if (itemTypeContainer) itemTypeContainer.innerHTML = '';
+    if (itemContainer) itemContainer.innerHTML = '';
 
     if (searchTerm.length < 2) {
         return; // Minimum 2 characters to search
     }
 
+    console.log("Searching for:", searchTerm);
+
     try {
         const response = await fetch(`/search-items/?search=${encodeURIComponent(searchTerm)}`);
         const items = await response.json();
+        
+        console.log("Found items:", items.length);
 
         // Display search results
         items.forEach(item => {
@@ -49,25 +74,19 @@ async function performGlobalSearch() {
             // Attempt to construct image path
             const imagePath = `/media/IMG/${item.category}/${item.item_type}/${item.ankama_id}-${window.sanitizeFilename(item.name)}.png`;
             
-            // Conditional rendering of craft information
-            const priceSection = item.category !== 'resources' 
-                ? `<p>Price: ${item.price || 'N/A'}</p>
-                <p>Craft: ${item.craft_price || 'N/A'}</p>` 
-                : `<p>Price: ${item.price || 'N/A'}</p>`;
-        
             itemElement.innerHTML = `
                 <h3>${item.name}</h3>
                 <p>Category: ${item.category}</p>
                 <p>Type: ${item.item_type}</p>
                 <p>Level: ${item.level}</p>
-                ${priceSection}
+                <p>Price: ${item.price || 'N/A'}</p>
                 <img 
                     src="${imagePath}" 
                     alt="${item.name}"
-                    onerror="this.src='${window.FALLBACK_IMAGE}'; this.onerror=null;"
+                    onerror="this.src='${window.FALLBACK_IMAGE || '/media/IMG/equipment/Outil/489-Loupe.png'}'; this.onerror=null;"
                 >
             `;
-            window.itemContainer.appendChild(itemElement);
+            if (itemContainer) itemContainer.appendChild(itemElement);
         });
     } catch (error) {
         console.error('Error performing global search:', error);
@@ -116,14 +135,13 @@ async function filterItems(category, itemType) {
             
             // Conditional rendering of craft information
             const priceSection = category !== 'resources' 
-                ? `<p>Price: ${item.price || 'N/A'}</p>
-                <p>Craft: ${item.craft_price || 'N/A'}</p>` 
+                ? `<p>Price: ${item.price || 'N/A'}</p>`
                 : `<p>Price: ${item.price || 'N/A'}</p>`;
             
             itemElement.innerHTML = `
                 <h3>${item.name}</h3>
                 <p>Level: ${item.level}</p>
-                ${priceSection}
+                <p>Price: ${item.price || 'N/A'}</p>
                 <img 
                     src="${imagePath} " 
                     alt="${item.name}"

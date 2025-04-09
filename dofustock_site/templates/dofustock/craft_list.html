@@ -67,6 +67,14 @@
                                                 <div>
                                                     <h5 class="mb-0">{{ resource.quantity }}</h5>
                                                     <p class="mb-0">{{ resource.resource_name }}</p>
+                                                    <p class="mb-0">Price: {{ resource.resource_price }}</p>
+                                                    <p class="mb-0">Price: 
+                                                        {% if resource.resource_price %}
+                                                            {{ resource.resource_price }}
+                                                        {% else %}
+                                                            No price available (Debug)
+                                                        {% endif %}
+                                                    </p>
                                                 </div>
                                             </div>
                                         </div>
@@ -90,6 +98,7 @@
                                     <h5 class="card-title">{{ item.name }}</h5>
                                     <div class="item-metadata">
                                         <p class="card-text"><span>{{ item.item_type }} - Level:</span> {{ item.level }}</p>
+                                        <p class="card-text"><strong>Price:</strong> {{ item.price }}</p>
                                     </div>
                                 </div>
 
@@ -123,6 +132,7 @@
                                             <th class="recipe-image"></th>
                                             <th class="recipe-quantity">Quantity</th>
                                             <th class="recipe-name">Resource</th>
+                                            <th class="recipe-price">Price</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -137,6 +147,7 @@
                                             </td>
                                             <td>{{ recipe.quantity }}</td>
                                             <td>{{ recipe.resource_name }}</td>
+                                            <td>{{ recipe.resource_price }}</td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>

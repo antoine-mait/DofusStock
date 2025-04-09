@@ -44,7 +44,13 @@
                 <p><strong><u>Type</u></strong>: {{ item.item_type }}</p>
             </div>
         </div>
-        <p><strong>Price</strong>: {{ item.price }}</p>
+        <p><strong>Price</strong>: 
+            {% if item.price %}
+                {{ item.price }}
+            {% else %}
+                No price available (Debug: item.price is empty or None)
+            {% endif %}
+        </p>
     </div>
 
     <div class="item-details-header">

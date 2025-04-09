@@ -6,7 +6,7 @@ from django.shortcuts import render , redirect , get_object_or_404
 from django.urls import reverse
 from django.conf import settings
 from django.http import JsonResponse
-from .models import User , Item , Craftlist
+from .models import User , Item , Craftlist , Price
 from playwright.sync_api import sync_playwright
 import json
 from django.db.models import Case, When, IntegerField, Value
@@ -80,6 +80,13 @@ def item_detail(request, ankama_id):
     try:
         item = Item.objects.get(ankama_id=ankama_id)
         
+        # Get the latest price for this item
+        try:
+            latest_price = item.prices.latest('date_updated')
+            item.price = latest_price.price
+        except:
+            item.price = "N/A"
+            
         # Get craftlist for the current user
         craftlist = set()
         if request.user.is_authenticated:
@@ -134,7 +141,16 @@ def get_items(request):
         item_type=item_type
     ).values()
     
-    return JsonResponse(list(items), safe=False)
+    # Convert to list and add price info
+    items_list = list(items)
+    for item in items_list:
+        try:
+            latest_price = Price.objects.filter(item_id=item['id']).latest('date_updated')
+            item['price'] = str(latest_price.price)
+        except:
+            item['price'] = "N/A"
+    
+    return JsonResponse(items_list, safe=False)
 
 def search_items(request):
     search_term = request.GET.get('search', '').strip()
@@ -160,12 +176,28 @@ def search_items(request):
         )
     ).order_by('-relevance')  # Sort by relevance, highest first
     
-    return JsonResponse(list(items.values()), safe=False)
+    # Convert to list and add price info
+    items_list = list(items.values())
+    for item in items_list:
+        try:
+            latest_price = Price.objects.filter(item_id=item['id']).latest('date_updated')
+            item['price'] = str(latest_price.price)
+        except:
+            item['price'] = "N/A"
+    
+    return JsonResponse(items_list, safe=False)
 
 def get_items_recipe(request, ankama_id):
     try:
         # Use the path parameter directly
         item = Item.objects.get(ankama_id=ankama_id)
+        
+        # Get the latest price
+        try:
+            latest_price = item.prices.latest('date_updated')
+            price = latest_price.price
+        except:
+            price = None
         
         effects = list(item.effects.values())
         recipes = list(item.recipes.values())
@@ -175,6 +207,7 @@ def get_items_recipe(request, ankama_id):
         item_data.pop('_state', None)  
         item_data['effects'] = effects
         item_data['recipes'] = recipes
+        item_data['price'] = price
         
         return JsonResponse(item_data)
     except Item.DoesNotExist:
@@ -285,12 +318,20 @@ def craft_list(request):
     total_resources = {}
     
     for item in items:
+        # Get the latest price for this item
+        try:
+            latest_price = item.prices.latest('date_updated')
+            item_price = latest_price.price
+        except:
+            item_price = "N/A"
+            
         item_data = {
             'ankama_id': item.ankama_id,
             'name': item.name,
             'category': item.category,
             'item_type': item.item_type,
             'level': item.level,
+            'price': item_price,  # Add the price here
             'sanitized_name': sanitize_filename(item.name),
             'recipes': []
         }
@@ -309,6 +350,13 @@ def craft_list(request):
                 resource_image = f"/media/IMG/{resource_item.category}/{resource_item.item_type}/{resource_item.ankama_id}-{sanitize_filename(resource_item.name)}.png"
                 recipe_dict['resource_image'] = resource_image
                 
+                # Get resource price if available
+                try:
+                    resource_price = resource_item.prices.latest('date_updated').price
+                    recipe_dict['resource_price'] = resource_price
+                except:
+                    recipe_dict['resource_price'] = "N/A"
+                
                 # Add to total resources
                 resource_key = str(recipe.resource_id)
                 if resource_key not in total_resources:
@@ -316,12 +364,14 @@ def craft_list(request):
                         'resource_id': recipe.resource_id,
                         'resource_name': recipe.resource_name,
                         'quantity': 0,
-                        'resource_image': resource_image
+                        'resource_image': resource_image,
+                        'resource_price': recipe_dict['resource_price']
                     }
                 total_resources[resource_key]['quantity'] += recipe.quantity
                 
             except Item.DoesNotExist:
                 recipe_dict['resource_image'] = '/media/IMG/equipment/Outil/489-Loupe.png'
+                recipe_dict['resource_price'] = "N/A"
                 
                 # Add to total resources even if resource item not found
                 resource_key = str(recipe.resource_id)
@@ -330,7 +380,8 @@ def craft_list(request):
                         'resource_id': recipe.resource_id,
                         'resource_name': recipe.resource_name,
                         'quantity': 0,
-                        'resource_image': '/media/IMG/equipment/Outil/489-Loupe.png'
+                        'resource_image': '/media/IMG/equipment/Outil/489-Loupe.png',
+                        'resource_price': "N/A"
                     }
                 total_resources[resource_key]['quantity'] += recipe.quantity
                 
@@ -341,10 +392,28 @@ def craft_list(request):
     # Convert total_resources dictionary to a list for the template
     all_resources = list(total_resources.values())
     
+    # Calculate total price of all resources if possible
+    total_cost = 0
+    can_calculate_total = True
+    
+    for resource in all_resources:
+        if resource['resource_price'] != "N/A":
+            try:
+                resource_cost = float(resource['resource_price']) * resource['quantity']
+                resource['total_cost'] = resource_cost
+                total_cost += resource_cost
+            except (ValueError, TypeError):
+                can_calculate_total = False
+                resource['total_cost'] = "N/A"
+        else:
+            can_calculate_total = False
+            resource['total_cost'] = "N/A"
+    
     return render(request, "dofustock/craft_list.html", {
         "items": items_with_recipes,
         "craftlist": set(items.values_list("ankama_id", flat=True)),
-        "all_resources": all_resources
+        "all_resources": all_resources,
+        "total_cost": total_cost if can_calculate_total else "N/A"
     })
 
 def toggle_craftlist(request, ankama_id):
