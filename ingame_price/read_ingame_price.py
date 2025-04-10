@@ -262,10 +262,17 @@ def process_directory(directory , user_input_slice , user_input_all):
         combined_df = pd.concat(item_dfs, ignore_index=True)
         
         # Apply correction dictionary to Item column
+
+        # Firt part of the name check
         if 'Item' in combined_df.columns:
             combined_df['Item'] = combined_df['Item'].apply(
                 lambda item: next((item.replace(wrong, correct) for wrong, correct in correction_dict.items() if wrong in item), item) if isinstance(item, str) else item)
         
+        # Full name check
+        if 'Item' in combined_df.columns:
+            combined_df['Item'] = combined_df['Item'].apply(
+                lambda item: correction_dict.get(item, item) if isinstance(item, str) else item)
+            
         # Save results
         if user_input_all == "y":
             output_path = os.path.join(tmp_folder, f"{directory}_Price.csv")
