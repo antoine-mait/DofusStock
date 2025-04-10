@@ -8,6 +8,7 @@ import win32con
 import ctypes
 import concurrent.futures
 import cv2
+import keyboard
 from PIL import Image
 from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
@@ -144,7 +145,7 @@ def IMG_Blackout():
             template_path = None  # Skip template matching if file doesn't exist
 
         if user_input == "y":
-            for directory in ["HDV_CONSUMABLE", "HDV_ITEM", "HDV_RESOURCES", "HDV_RUNES"]:
+            for directory in ["HDV_CONSUMABLE", "HDV_ITEM", "HDV_RESOURCES", "HDV_RUNES" , "HDV_CREATURE"]:
                 print(f"Processing img in {directory} folder")
                 path = os.path.join(main_folder, f"{directory}", f"{directory}_PRICE_IMG")
 
@@ -244,6 +245,7 @@ def HDV_Screenshot():
             "HDV_CONSUMABLE": 218, #218
             "HDV_ITEM": 304, #304
             "HDV_RUNES": 19, #19
+            "HDV_CREATURE": 65, #65
         }
         nb_loop = nb_loop_mapping.get(HDV_name)
 
@@ -284,14 +286,38 @@ def HDV_Screenshot():
         - main_folder_dir (str): Main directory path for images and folders.
         """
 
+        if map_name == "HDV_CREATURE":
+            print("click on hdv")
+            # Move to HDV position
+            start_pos = pyautogui.position()
+            end_pos = (1300, 400)
+            move_with_jitter(start_pos, end_pos)
+            time.sleep(random.uniform(1, 2))
+            real_click(1300, 400)
+            
+            time.sleep(random.uniform(1, 2))
+            print("active options")
+            
+            # Define Y positions to click (all with the same X coordinate of 670)
+            y_positions = [715, 785, 890, 575, 600, 625, 650, 680, 750, 825, 850, 925, 950, 975]
+            
+            # Click all positions with random delay
+            for y in y_positions:
+                left_click(670, y)
+                time.sleep(random.uniform(1, 1.2))
+            
+            # Set directory variables
+            folder_dir = f"{main_folder_dir}HDV_CREATURE\\"
+            HDV_name = "HDV_CREATURE"
+
         if map_name == "HDV_RUNES":
             print("click on hdv")
             # Move to HDV position
             start_pos = pyautogui.position()
-            end_pos = (870, 250)
+            end_pos = (1250, 550)
             move_with_jitter(start_pos, end_pos)
             time.sleep(random.uniform(1, 2))
-            real_click(870, 250)
+            real_click(1250, 550)
             
             time.sleep(random.uniform(1, 2))
             print("active options")
@@ -302,7 +328,7 @@ def HDV_Screenshot():
             # Click all positions with random delay
             for y in y_positions:
                 left_click(670, y)
-                time.sleep(random.uniform(0.7, 1.2))
+                time.sleep(random.uniform(1, 1.2))
             
             # Set directory variables
             folder_dir = f"{main_folder_dir}HDV_RUNES\\"
@@ -312,10 +338,10 @@ def HDV_Screenshot():
             print("click on hdv")
             # Move to HDV position
             start_pos = pyautogui.position()
-            end_pos = (840, 830)
+            end_pos = (1500, 870)
             move_with_jitter(start_pos, end_pos)
             time.sleep(random.uniform(1, 2))
-            real_click(840, 830)
+            real_click(1500, 870)
             
             time.sleep(random.uniform(1, 2))
             print("active options")
@@ -333,7 +359,7 @@ def HDV_Screenshot():
             # Click all positions with random delay
             for x, y in click_positions:
                 left_click(x, y)
-                time.sleep(random.uniform(0.7, 1.2))
+                time.sleep(random.uniform(1, 1.2))
             
             # Set directory variables
             folder_dir = f"{main_folder_dir}HDV_ITEM\\"
@@ -343,10 +369,10 @@ def HDV_Screenshot():
             print("click on hdv")
             # Move to HDV position
             start_pos = pyautogui.position()
-            end_pos = (1890, 550)
+            end_pos = (1650, 770)
             move_with_jitter(start_pos, end_pos)
             time.sleep(random.uniform(1, 2))
-            real_click(1890, 550)
+            real_click(1650, 770)
             time.sleep(random.uniform(1, 2))
 
             # Define all the Y ranges to click (with same X coordinate)
@@ -370,7 +396,7 @@ def HDV_Screenshot():
             def click_range(positions):
                 for y in positions:
                     left_click(645, y)
-                    time.sleep(random.uniform(0.7, 1.2))
+                    time.sleep(random.uniform(1, 1.2))
             
             # Process the first range
             click_range(click_ranges[0])
@@ -396,34 +422,34 @@ def HDV_Screenshot():
             print("click on hdv")
             # Move to HDV position
             start_pos = pyautogui.position()
-            end_pos = (730, 715)
+            end_pos = (1660, 400)
             move_with_jitter(start_pos, end_pos)
             time.sleep(random.uniform(1, 2))
-            real_click(730, 715)
+            real_click(1660, 400)
             time.sleep(random.uniform(1, 2))
 
             # Define all the Y ranges to click (with same X coordinate)
+            y_increment = 26
             click_ranges = [
                 # First range
-                range(575, 875 + 25, 25),
+                range(575, 875 + y_increment, y_increment),
 
                 # After first scroll
-                range(605, 1040 + 25, 25),
+                range(605, 1040 + y_increment, y_increment),
                 
                 # After second scroll
-                range(525, 990 + 25, 25),
+                range(500, 990 + y_increment, y_increment),
 
                 # After second scroll
-                range(885, 1040 + 25, 25),
+                range(885, 1040 + y_increment, y_increment),
 
-                [710]
             ]
             
             # Function to perform clicks for a range of positions
             def click_range(positions):
                 for y in positions:
                     left_click(630, y)
-                    time.sleep(random.uniform(0.7, 1.2))
+                    time.sleep(random.uniform(1, 1.2))
 
             click_range(click_ranges[0])
             
@@ -438,8 +464,6 @@ def HDV_Screenshot():
             scroll()
             click_range(click_ranges[3])
 
-            click_range(click_ranges[4])
-
             folder_dir = f"{main_folder_dir}HDV_RESOURCES\\"
             HDV_name = "HDV_RESOURCES"
 
@@ -450,7 +474,7 @@ def HDV_Screenshot():
             return True
 
 
-    def map(main_folder_dir, folder_dir_tmp, map_name_tmp, starting_map=None):
+    def map(main_folder_dir, starting_map=None):
         """
         Manages the navigation and interaction based on the current map.
 
@@ -458,10 +482,11 @@ def HDV_Screenshot():
         - current_map (str): The name of the current map being processed.
         """
         map_names = [
+            "HDV_CREATURE",
             "HDV_RUNES",
             "HDV_ITEM",
-            "HDV_CONSUMABLE",
             "HDV_RESOURCES",
+            "HDV_CONSUMABLE",
         ]
 
         # Start from the beginning or from a specific map
@@ -492,16 +517,20 @@ def HDV_Screenshot():
                     print("All HDV processing complete")
                     print("All 4 HDV screenshot")
 
-                    print("Return to HDV runes")
+                    print("Return to HDV Creature")
+                    time.sleep(random.uniform(1,1.2))
 
-                    click_top()
-                    print("click top")
-                    time.sleep(random.uniform(3, 3))
+                    real_click(1980 , 335)
+                    time.sleep(random.uniform(1,1.2))
 
-                    for _ in range(4):
-                        print("click left")
-                        click_left()
-                        time.sleep(random.uniform(5, 8))
+                    real_click(350 , 1385)
+                    travel = "/travel -25,38"
+                    for char in travel:
+                        keyboard.write(char, delay=0.05)
+                    keyboard.press_and_release('enter')
+                    time.sleep(random.uniform(0.5,1))
+                    keyboard.press_and_release('enter')
+                    time.sleep(random.uniform(25,28))
 
                     
                     # Record end time and calculate duration
@@ -510,11 +539,7 @@ def HDV_Screenshot():
                     
                     print(f"HDV Screenshot completed in {duration:.2f} seconds ({duration/60:.2f} minutes)")
 
-
-                    # HDV_Reader()
-
                     break
-
 
     def map_switch(current_map, next_map):
         """
@@ -525,30 +550,50 @@ def HDV_Screenshot():
         
         print(f"Navigating from {current_map} to {next_map}")
     
+        # Navigation from HDV_CREATURE to HDV_RUNES
+        if current_map == "HDV_CREATURE" and next_map == "HDV_RUNES":
+            print("Moving from CREATURE to RUNE")
+            time.sleep(random.uniform(1, 2))
+            click_left()
+            time.sleep(random.uniform(8, 10))
+
         # Navigation from HDV_RUNES to HDV_ITEM
         if current_map == "HDV_RUNES" and next_map == "HDV_ITEM":
             print("Moving from RUNES to ITEM")
+            real_click(350 , 1385)
+            travel = "/travel -28,35"
+            for char in travel:
+                keyboard.write(char, delay=0.05)
+            keyboard.press_and_release('enter')
+            time.sleep(random.uniform(0.5,1))
+            keyboard.press_and_release('enter')
+            time.sleep(random.uniform(25,28))
+
+        # Navigation from HDV_ITEM to HDV_RESOURCES
+        elif current_map == "HDV_ITEM" and next_map == "HDV_RESOURCES":
+            print("Moving from ITEM to RESSOURCES")
             time.sleep(random.uniform(1, 2))
+            print("click right")
             click_right()
+            time.sleep(random.uniform(8,10))
+            print("click top")
+            real_click(1950, 120)
+            time.sleep(random.uniform(8, 10))
+
+    
+        # Navigation from HDV_RESOURCES to HDV_CONSUMABLE
+        elif current_map == "HDV_RESOURCES" and next_map == "HDV_CONSUMABLE":
+            print("Moving from RESOURCES to CONSUMABLE")
             time.sleep(random.uniform(1, 2))
-            click_right()
-            time.sleep(random.uniform(5, 8))
-        
-        # Navigation from HDV_ITEM to HDV_CONSUMABLE
-        elif current_map == "HDV_ITEM" and next_map == "HDV_CONSUMABLE":
-            print("Moving from ITEM to CONSUMABLE")
-            time.sleep(random.uniform(1, 2))
-            click_right()
-            time.sleep(random.uniform(5, 8))
-            click_right()
-            time.sleep(random.uniform(5, 8))
-        
-        # Navigation from HDV_CONSUMABLE to HDV_RESOURCES
-        elif current_map == "HDV_CONSUMABLE" and next_map == "HDV_RESOURCES":
-            print("Moving from CONSUMABLE to RESOURCES")
-            time.sleep(random.uniform(1, 2))
+            print("click bot")
             click_bottom()
-            time.sleep(random.uniform(5, 8))
+            time.sleep(random.uniform(8,10))
+            click_right()
+            time.sleep(random.uniform(8,10))
+            click_right()
+            time.sleep(random.uniform(8,10))
+            click_bottom()
+            time.sleep(random.uniform(8,10))
 
     def left_click(x, y):
         win32api.SetCursorPos((x, y))
@@ -571,7 +616,7 @@ def HDV_Screenshot():
 
     def click_top():
         start_pos = pyautogui.position()
-        end_pos = (random.uniform(480, 2060), 30)
+        end_pos = (random.uniform(500, 2060), 36)
         move_with_jitter(start_pos, end_pos)
         current_pos = pyautogui.position()
         left_click(current_pos.x, current_pos.y)
@@ -630,7 +675,7 @@ def HDV_Screenshot():
         main_folder_dir = main_folder
         folder_dir_tmp = tmp_folder
         map_name_tmp = "coordinate_tmp"
-        map(main_folder_dir, folder_dir_tmp, map_name_tmp)
+        map(main_folder_dir)
 
     # Record start time
     start_time = time.time()

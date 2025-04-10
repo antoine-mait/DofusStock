@@ -295,10 +295,10 @@ def main():
     """Main function to process all directories in parallel"""
     overall_start = time.time()
     
-    user_input_slice = "n" #input("Slice image ? y or n")
+    user_input_slice = "y" #input("Slice image ? y or n")
     user_input_all = "y" #input("all image ? y or n")
 
-    directories = ["HDV_CONSUMABLE", "HDV_ITEM", "HDV_RESOURCES", "HDV_RUNES"]
+    directories = ["HDV_CONSUMABLE", "HDV_ITEM", "HDV_RESOURCES", "HDV_RUNES" ,"HDV_CREATURE"]
     # directories = ["HDV_RUNES"]
     # if user_input_all == "n":
         #  directories = ["HDV_CONSUMABLE"]
