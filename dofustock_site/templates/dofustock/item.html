@@ -7,99 +7,52 @@
 
 {% block body %}
 <div class="item-detail-container">
-    <div class="item-header">
-        <div class="item-header-content">
-            <h1>{{ item.name }}</h1>
-            {% if item.ankama_id in craftlist %}
-
-                <div class="craft_list" >
-                    <form method="POST" action="{% url 'toggle_craftlist' item.ankama_id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-sm remove-from-craft-list">
-                            
+    <div class="item-detail-left">
+        <div class="item-header">
+            <div class="item-header-content">
+                <div class="item-image">
+                    <img 
+                        src="/media/IMG/{{ item.category }}/{{ item.item_type }}/{{ item.ankama_id }}-{{ item.sanitized_name }}.png" 
+                        alt="{{ item.name }}"
+                        onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;"
+                    >
+                </div>
+                <h1>{{ item.name }}</h1>
+                {% if item.ankama_id in craftlist %}
+                    <div class="craft_list" >
+                        <form method="POST" action="{% url 'toggle_craftlist' item.ankama_id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm remove-from-craft-list">
                                 Remove from craft list
-
-                        </button>
-                    </form>
-                </div>
-
-            {% else %}
-
-                <div class="craft_list">
-                    <form method="POST" action="{% url 'toggle_craftlist' item.ankama_id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-primary btn-sm add-to-craft-list">
-
+                            </button>
+                        </form>
+                    </div>
+                {% else %}
+                    <div class="craft_list">
+                        <form method="POST" action="{% url 'toggle_craftlist' item.ankama_id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary btn-sm add-to-craft-list">
                                 Add to craft list
-
-                        </button>
-                    </form>
-                </div>
-
-            {% endif %}
-
-            <div class="item-metadata">
-                <p><strong><u>Level</u></strong>: {{ item.level }}</p>
-                <p><strong><u>Category</u></strong>: {{ item.category }}</p>
-                <p><strong><u>Type</u></strong>: {{ item.item_type }}</p>
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
             </div>
-        </div>
-        <p><strong>Price</strong>: 
-            {% if item.price %}
-                {{ item.price }}
-            {% else %}
-                No price available (Debug: item.price is empty or None)
-            {% endif %}
-        </p>
-    </div>
-
-    <div class="item-details-header">
-        <div class="item-image">
-            <img 
-                src="/media/IMG/{{ item.category }}/{{ item.item_type }}/{{ item.ankama_id }}-{{ item.sanitized_name }}.png" 
-                alt="{{ item.name }}"
-                onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;"
-            >
+            
+            <div class="item-metadata">
+                <p>
+                    <strong><u>Level</u></strong>: {{ item.level }} |
+                    <strong><u>Category</u></strong>: {{ item.category }} |
+                    <strong><u>Type</u></strong>: {{ item.item_type }} |
+                    <strong>Price</strong>: {{ item.price }}
+                </p>
+            </div>
         </div>
 
         {% if item.description %}
         <div class="item-description">
             <h2>Description</h2>
             <p>{{ item.description }}</p>
-        </div>
-        {% endif %}
-    </div>
-
-    <div class="item-details-row">
-        {% if recipes %}
-        <div class="item-recipes">
-            <h2>Crafting Recipe</h2>
-            <p><strong>Craft price</strong>: {{ item.price }}</p>
-            <table>
-                <thead>
-                    <tr>
-                        <th class="recipe-image"></th>
-                        <th class="recipe-quantity">Quantity</th>
-                        <th class="recipe-name">Resource</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for recipe in recipes %}
-                    <tr>
-                        <td>
-                            <img 
-                                src="{{ recipe.resource_image }}" 
-                                alt="{{ recipe.resource_name }}"
-                                style="max-width: 50px; max-height: 50px; object-fit: contain;"
-                                onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;"
-                            >
-                        </td>
-                        <td>{{ recipe.quantity }}</td>
-                        <td>{{ recipe.resource_name }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
         </div>
         {% endif %}
 
@@ -111,6 +64,44 @@
                 <li>{{ effect.description }}</li>
                 {% endfor %}
             </ul>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="item-detail-right">
+        {% if recipes %}
+        <div class="item-recipes">
+            <h2>Crafting Recipe</h2>
+            <p><strong>Item price</strong>: {{ item.price }}</p>
+            <p><strong>Total craft cost</strong>: {{ item.craft_cost }}</p>
+            <table class="recipe-table">
+                <thead>
+                    <tr>
+                        <th class="recipe-image"></th>
+                        <th class="recipe-quantity">Quantity</th>
+                        <th class="recipe-name">Resource</th>
+                        <th class="recipe-price">Unit Price</th>
+                        <th class="recipe-total">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for recipe in recipes %}
+                    <tr>
+                        <td class="recipe-image">
+                            <img 
+                                src="{{ recipe.resource_image }}" 
+                                alt="{{ recipe.resource_name }}"
+                                onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;"
+                            >
+                        </td>
+                        <td class="recipe-quantity">{{ recipe.quantity }}</td>
+                        <td class="recipe-name">{{ recipe.resource_name }}</td>
+                        <td class="recipe-price">{{ recipe.unit_price }}</td>
+                        <td class="recipe-total">{{ recipe.total_price }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
         {% endif %}
     </div>

@@ -74,12 +74,26 @@ async function performGlobalSearch() {
             // Attempt to construct image path
             const imagePath = `/media/IMG/${item.category}/${item.item_type}/${item.ankama_id}-${window.sanitizeFilename(item.name)}.png`;
             
+            function formatPrice(price) {
+                if (price === 0) return 'No Item in HDV';
+                if (!price) return 'No data';
+                
+                // Convert to integer by removing decimal part
+                const intPrice = Math.floor(price);
+                
+                // Format with spaces as thousand separators
+                return intPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+              }
+              
+              // Conditional rendering of price information
+              const priceSection = `<p>Price: ${formatPrice(item.price)}</p>`;
+
             itemElement.innerHTML = `
                 <h3>${item.name}</h3>
                 <p>Category: ${item.category}</p>
                 <p>Type: ${item.item_type}</p>
                 <p>Level: ${item.level}</p>
-                <p>Price: ${item.price || 'N/A'}</p>
+                <p>Price: ${priceSection}</p>
                 <img 
                     src="${imagePath}" 
                     alt="${item.name}"
@@ -133,15 +147,24 @@ async function filterItems(category, itemType) {
             
             const imagePath = `/media/IMG/${category}/${itemType}/${item.ankama_id}-${window.sanitizeFilename(item.name)}.png`;
             
-            // Conditional rendering of craft information
-            const priceSection = category !== 'resources' 
-                ? `<p>Price: ${item.price || 'N/A'}</p>`
-                : `<p>Price: ${item.price || 'N/A'}</p>`;
+            function formatPrice(price) {
+                if (price === 0) return 'No Item in HDV';
+                if (!price) return 'No data';
+                
+                // Convert to integer by removing decimal part
+                const intPrice = Math.floor(price);
+                
+                // Format with spaces as thousand separators
+                return intPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+              }
+              
+              // Conditional rendering of price information
+              const priceSection = `<p>Price: ${formatPrice(item.price)}</p>`;
             
             itemElement.innerHTML = `
                 <h3>${item.name}</h3>
                 <p>Level: ${item.level}</p>
-                <p>Price: ${item.price || 'N/A'}</p>
+                <p>Price: ${priceSection}</p>
                 <img 
                     src="${imagePath} " 
                     alt="${item.name}"

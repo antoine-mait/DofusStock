@@ -9,8 +9,9 @@ from django.http import JsonResponse
 from .models import User , Item , Craftlist , Price
 from playwright.sync_api import sync_playwright
 import json
+import re
 from django.db.models import Case, When, IntegerField, Value
-
+from django.template.defaultfilters import floatformat
 
 from .utils import sanitize_filename
 # Create your views here.
@@ -83,7 +84,15 @@ def item_detail(request, ankama_id):
         # Get the latest price for this item
         try:
             latest_price = item.prices.latest('date_updated')
-            item.price = latest_price.price
+            if latest_price.price is not None:
+                if latest_price.price == 0:
+                    item.price = "Free"
+                else:
+                    # Format with spaces
+                    price_int = int(latest_price.price)
+                    item.price = f"{price_int:,}".replace(',', ' ')
+            else:
+                item.price = "N/A"
         except:
             item.price = "N/A"
             
@@ -98,17 +107,61 @@ def item_detail(request, ankama_id):
         
         # Fetch recipes with full resource details
         recipes = []
+        total_craft_cost = 0
+        all_prices_available = True
+        
         for recipe in item.recipes.all():
-            recipe_dict = recipe.__dict__
+            recipe_dict = {
+                'resource_id': recipe.resource_id,
+                'resource_name': recipe.resource_name,
+                'quantity': recipe.quantity,
+            }
             
             # Try to find the resource item
             try:
                 resource_item = Item.objects.get(ankama_id=recipe.resource_id)
                 recipe_dict['resource_image'] = f"/media/IMG/{resource_item.category}/{resource_item.item_type}/{resource_item.ankama_id}-{sanitize_filename(resource_item.name)}.png"
+                
+                # Get the latest price for this resource
+                try:
+                    resource_price = resource_item.prices.latest('date_updated')
+                    if resource_price.price is not None:
+                        if resource_price.price == 0:
+                            recipe_dict['unit_price'] = "Free"
+                            recipe_dict['total_price'] = "Free"
+                        else:
+                            # Store the numeric values
+                            unit_price = int(resource_price.price)
+                            total_price = unit_price * recipe.quantity
+                            
+                            # Format prices
+                            recipe_dict['unit_price'] = f"{unit_price:,}".replace(',', ' ')
+                            recipe_dict['total_price'] = f"{total_price:,}".replace(',', ' ')
+                            
+                            # Add to total craft cost
+                            total_craft_cost += total_price
+                    else:
+                        recipe_dict['unit_price'] = "N/A"
+                        recipe_dict['total_price'] = "N/A"
+                        all_prices_available = False
+                except:
+                    recipe_dict['unit_price'] = "N/A"
+                    recipe_dict['total_price'] = "N/A"
+                    all_prices_available = False
+                    
             except Item.DoesNotExist:
                 recipe_dict['resource_image'] = '/media/IMG/equipment/Outil/489-Loupe.png'
+                recipe_dict['unit_price'] = "N/A"
+                recipe_dict['total_price'] = "N/A"
+                all_prices_available = False
             
             recipes.append(recipe_dict)
+        
+        # Format the total craft cost
+        if all_prices_available:
+            item.craft_cost = f"{total_craft_cost:,}".replace(',', ' ')
+        else:
+            item.craft_cost = "Incomplete"
         
         effects = list(item.effects.values())
         
