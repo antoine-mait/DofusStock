@@ -99,11 +99,8 @@ async function displayExtractedItems(items) {
     if (items.length > 0) {
 
         const gridContainer = document.createElement('div');
-        gridContainer.style.display = "grid";
-        gridContainer.style.gridTemplateColumns = "repeat(2, 1fr)"; // 2 columns
-        gridContainer.style.gap = "10px"; // Spacing between items
-        gridContainer.style.width = "100%";
-
+        gridContainer.classList.add('items-grid');
+        
         // Process each item to search for it in the database and get its image
         for (const itemName of items) {
             try {
@@ -143,7 +140,7 @@ async function displayExtractedItems(items) {
                                     data-item-data="${encodeURIComponent(JSON.stringify(item))}"
                                     data-csrf="${csrfToken}"
                                     ${isInCraftList ? 'disabled' : ''}>
-                                    ${isInCraftList ? 'Added to craft list' : 'Add to craft list'}
+                                    ${isInCraftList ? '✓' : '+'}
                                 </button>
                             </div>
                         </div>
@@ -176,7 +173,7 @@ async function displayExtractedItems(items) {
                 const result = await window.toggleCraftlistItem(itemId);
                 if (result.status === 'added') {
                     // Update button state
-                    this.textContent = "Added to craft list";
+                    this.textContent = Math.sign(3);
                     this.disabled = true;
                     this.classList.remove('btn-primary');
                     this.classList.add('btn-success');

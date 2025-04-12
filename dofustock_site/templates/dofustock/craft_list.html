@@ -9,7 +9,26 @@
 <div class="item-detail-container">
     <div class="item-detail-left">
         <div class="card-header">
-            <h2>Craft List Generator</h2>
+            <table class="prices-compare">
+                <tbody>
+                    <tr>
+                        <td>
+                            {% if price_comparison == "hdv_better" %}
+                                <h3>Total Price: <span class="price-better">{{ total_hdv_price }}</span></h3>
+                            {% elif price_comparison == "craft_better" %}
+                                <h3>Total Price: <span class="price-worse">{{ total_hdv_price }}</span></h3>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if price_comparison == "hdv_better" %}
+                                <h3>Total Craft Price: <span class="price-worse">{{ total_cost }}</span></h3>
+                            {% elif price_comparison == "craft_better" %}
+                                <h3>Total Craft Price: <span class="price-better">{{ total_cost }}</span></h3>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
         <div class="card-body">
             <p class="card-text">Enter a Dofus Build URL (https://d-bk.net/fr/d/...) to extract items:</p>
@@ -94,15 +113,13 @@
                                 
                             <!-- Row 3: Recipe Table -->
                             <div class="item-recipes">
-                                <h6 class="recipe-title">Recipe</h6>
                                 <table>
                                     <thead>
                                         <tr>
                                             <th class="recipe-image"></th>
                                             <th class="recipe-name">Resource</th>
                                             <th class="recipe-quantity">Qty</th>
-                                            <th class="recipe-price">Unit</th>
-                                            <th class="recipe-price">Total</th>
+                                            <th class="recipe-price">Prices</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -117,8 +134,10 @@
                                             </td>
                                             <td>{{ recipe.resource_name }}</td>
                                             <td>{{ recipe.quantity }}</td>
-                                            <td>{{ recipe.resource_price }}</td>
-                                            <td>{{ recipe.total_price }}</td>
+                                            <td class="prices">
+                                                <div class="unit-price">{{ recipe.resource_price }} /u</div>
+                                                <div class="total-price">{{ recipe.total_price }}</div>
+                                            </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>

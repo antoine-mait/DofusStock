@@ -378,6 +378,9 @@ def craft_list(request):
     # Dictionary to track total resources needed
     total_resources = {}
     
+    total_hdv_price = 0
+    can_calculate_hdv_total = True
+
     for item in items:
         # Get the latest price for this item
         try:
@@ -385,14 +388,19 @@ def craft_list(request):
             if latest_price.price is not None:
                 if latest_price.price == 0:
                     item_price = "No Data"
+                    can_calculate_hdv_total = False
                 else:
                     # Format with spaces - same as in item_detail
                     price_int = int(latest_price.price)
                     item_price = f"{price_int:,}".replace(',', ' ')
+
+                    total_hdv_price += price_int
             else:
                 item_price = "N/A"
+                can_calculate_hdv_total = False
         except:
             item_price = "N/A"
+            can_calculate_hdv_total = False
             
         total_craft_cost, all_prices_available = calculate_craft_cost(item)
         craft_cost = format_craft_cost(total_craft_cost, all_prices_available)
@@ -510,11 +518,38 @@ def craft_list(request):
     else:
         total_cost_formatted = "N/A"
     
+    # Format the total HDV price
+    if can_calculate_hdv_total:
+        total_hdv_price_formatted = f"{int(total_hdv_price):,}".replace(',', ' ')
+    else:
+        total_hdv_price_formatted = "N/A"
+
+        numeric_total_cost = None
+    numeric_hdv_price = None
+    
+    if total_cost_formatted != "N/A":
+        numeric_total_cost = int(total_cost)
+    
+    if total_hdv_price_formatted != "N/A":
+        numeric_hdv_price = int(total_hdv_price)
+    
+    # Determine which price is better
+    price_comparison = None
+    if numeric_total_cost is not None and numeric_hdv_price is not None:
+        if numeric_total_cost > numeric_hdv_price:
+            price_comparison = "hdv_better"  # HDV price is lower (better)
+        elif numeric_total_cost < numeric_hdv_price:
+            price_comparison = "craft_better"  # Craft price is lower (better)
+        else:
+            price_comparison = "equal"
+
     return render(request, "dofustock/craft_list.html", {
         "items": items_with_recipes,
         "craftlist": set(items.values_list("ankama_id", flat=True)),
         "all_resources": all_resources,
-        "total_cost": total_cost_formatted
+        "total_cost": total_cost_formatted,
+        "total_hdv_price": total_hdv_price_formatted,
+        "price_comparison": price_comparison 
     })
 
 def toggle_craftlist(request, ankama_id):
