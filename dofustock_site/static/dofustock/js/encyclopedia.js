@@ -74,26 +74,13 @@ async function performGlobalSearch() {
             // Attempt to construct image path
             const imagePath = `/media/IMG/${item.category}/${item.item_type}/${item.ankama_id}-${window.sanitizeFilename(item.name)}.png`;
             
-            function formatPrice(price) {
-                if (price === 0) return 'No Item in HDV';
-                if (!price) return 'No data';
-                
-                // Convert to integer by removing decimal part
-                const intPrice = Math.floor(price);
-                
-                // Format with spaces as thousand separators
-                return intPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-              }
-              
-              // Conditional rendering of price information
-              const priceSection = `<p>Price: ${formatPrice(item.price)}</p>`;
-
             itemElement.innerHTML = `
                 <h3>${item.name}</h3>
                 <p>Category: ${item.category}</p>
                 <p>Type: ${item.item_type}</p>
                 <p>Level: ${item.level}</p>
-                <p>Price: ${priceSection}</p>
+                <p>Price: ${formatPriceDisplay(item.price)}</p>
+                <p>Craft Cost: ${formatPriceDisplay(item.craft_cost)}</p>
                 <img 
                     src="${imagePath}" 
                     alt="${item.name}"
@@ -147,26 +134,13 @@ async function filterItems(category, itemType) {
             
             const imagePath = `/media/IMG/${category}/${itemType}/${item.ankama_id}-${window.sanitizeFilename(item.name)}.png`;
             
-            function formatPrice(price) {
-                if (price === 0) return 'No Item in HDV';
-                if (!price) return 'No data';
-                
-                // Convert to integer by removing decimal part
-                const intPrice = Math.floor(price);
-                
-                // Format with spaces as thousand separators
-                return intPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-              }
-              
-              // Conditional rendering of price information
-              const priceSection = `<p>Price: ${formatPrice(item.price)}</p>`;
-            
             itemElement.innerHTML = `
                 <h3>${item.name}</h3>
                 <p>Level: ${item.level}</p>
-                <p>Price: ${priceSection}</p>
+                <p>Price: ${formatPriceDisplay(item.price)}</p>
+                <p>Craft Price: ${formatPriceDisplay(item.craft_cost)}</p>
                 <img 
-                    src="${imagePath} " 
+                    src="${imagePath}" 
                     alt="${item.name}"
                     onerror="this.src='${window.FALLBACK_IMAGE}'; this.onerror=null;"
                 >
@@ -176,6 +150,41 @@ async function filterItems(category, itemType) {
     } catch (error) {
         console.error('Error fetching items:', error);
     }
+}
+
+// Helper function to format price values for display
+function formatPriceDisplay(price) {
+    // Special case handling
+    if (price === 0 || price === "0") return 'No Item in HDV';
+    if (!price || price === "N/A") return 'No data';
+    if (price === "Incomplete") return 'Incomplete';
+    
+    // If already a string and not a valid number, return as is
+    if (typeof price === 'string') {
+        // Check if it's already properly formatted (contains spaces)
+        if (price.includes(' ')) return price;
+        
+        // Check if it's a numeric string without formatting
+        if (!isNaN(price.replace(/[\s,]/g, ''))) {
+            // Parse the string as a number, removing any existing formatting
+            const numValue = parseInt(price.replace(/[\s,]/g, ''), 10);
+            if (!isNaN(numValue)) {
+                // Format with spaces as thousand separators
+                return numValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+            }
+        }
+        
+        // If we can't parse it as a number, return the original string
+        return price;
+    }
+    
+    // If it's a number, format it with spaces
+    if (typeof price === 'number') {
+        return Math.floor(price).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    }
+    
+    // Default fallback
+    return String(price);
 }
 
 // Expose necessary functions to other modules

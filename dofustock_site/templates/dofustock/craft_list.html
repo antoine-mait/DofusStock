@@ -6,8 +6,8 @@
 <link href="{% static 'dofustock/css/craft-list.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
-<div class="container mt-4">
-    <div class="card">
+<div class="item-detail-container">
+    <div class="item-detail-left">
         <div class="card-header">
             <h2>Craft List Generator</h2>
         </div>
@@ -41,98 +41,68 @@
                 <h3 class="d-none" id="results-title">Items Found:</h3>
                 <div id="items-list"></div>
             </div>
-            
-            <div class="craft-list-container mt-5">
-                {% if items %}
-                <div>
-                <h4> Ressources </h4>
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4>Total Resources Needed</h4>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    {% for resource in all_resources %}
-                                    <div class="col-md-3 mb-3">
-                                        <div class="card">
-                                            <div class="card-body d-flex align-items-center">
-                                                <img 
-                                                    src="{{ resource.resource_image }}" 
-                                                    alt="{{ resource.resource_name }}"
-                                                    style="max-width: 25px; max-height: 25px; object-fit: contain; margin-right: 10px;"
-                                                    onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;"
-                                                >
-                                                <div>
-                                                    <h5 class="mb-0">{{ resource.quantity }}</h5>
-                                                    <p class="mb-0">{{ resource.resource_name }}</p>
-                                                    <p class="mb-0">Price: {{ resource.resource_price }}</p>
-                                                    <p class="mb-0">Price: 
-                                                        {% if resource.resource_price %}
-                                                            {{ resource.resource_price }}
-                                                        {% else %}
-                                                            No price available (Debug)
-                                                        {% endif %}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <h4> Items </h4>
-                <div class="row">
-                {% for item in items %}
-                <div class="col-md-4 mb-3" id="craft-item-{{ item.ankama_id }}">
+        </div>
+
+        <h4>Items</h4>
+        <div class="craft-list-container">
+            {% for item in items %}
+            <div class="row mb-3" id="craft-item-{{ item.ankama_id }}">
+                <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <!-- Left column: Title and metadata -->
-                                <div class="item-info">
-                                    <h5 class="card-title">{{ item.name }}</h5>
-                                    <div class="item-metadata">
-                                        <p class="card-text"><span>{{ item.item_type }} - Level:</span> {{ item.level }}</p>
-                                        <p class="card-text"><strong>Price:</strong> {{ item.price }}</p>
-                                    </div>
-                                </div>
-
-                                <!-- Middle column: Buttons -->
-                                <div class="button-container mx-1">
-                                    <button type="button" class="btn btn-danger btn-sm remove-from-craft-list" 
-                                            data-item-id="{{ item.ankama_id }}"
-                                            style="border: none; background: transparent; padding: 0;">
-                                            <img class="trash icon-small" src="/media/Icon/trash.png" alt="delete" >
-                                    </button>
-                                    <a href="{% url 'item_detail' item.ankama_id %}" 
-                                    style="border: none; background: transparent; padding: 0; margin-bottom: 5px; display: block;">
-                                        <img class="info icon-small" src="/media/Icon/info.png" alt="details">
-                                    </a>
-
-                                </div>
-
-                                <!-- Right column: Image -->
-                                <div class="item-image">
+                            <!-- Row 1: Image, Name and Buttons -->
+                            <div class="d-flex align-items-center mb-3">
+                                <!-- Item Image -->
+                                <div class="item-image mr-3">
                                     <img src="/media/IMG/{{item.category}}/{{item.item_type}}/{{item.ankama_id}}-{{item.sanitized_name}}.png" 
                                         alt="{{item.name}}" class="item_img"
                                         onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;">
                                 </div>
+                                
+                                <!-- Item Name -->
+                                <h5 class="card-title mb-0 flex-grow-1">{{ item.name }}</h5>
+                                
+                                <!-- Action Buttons -->
+                                <div class="button-actions d-flex">
+                                    <!-- Ensure the button itself has the remove-from-craft-list class -->
+                                    <button type="button" 
+                                            class="btn btn-sm remove-from-craft-list" 
+                                            data-item-id="{{ item.ankama_id }}">
+                                        <img class="trash icon-small" src="/media/Icon/trash.png" alt="delete">
+                                    </button>
+                                    <a href="{% url 'item_detail' item.ankama_id %}" 
+                                    class="btn btn-sm">
+                                        <img class="info icon-small" src="/media/Icon/info.png" alt="details">
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <!-- Row 2: Item Metadata -->
+                            <div class="item-metadata mb-3">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <p class="card-text"><span>{{ item.item_type }} - Level:</span> {{ item.level }}</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="card-text"><strong>Price:</strong> {{ item.price }}</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="card-text"><strong>Craft Cost:</strong> {{ item.craft_cost }}</p>
+                                    </div>
+                                </div>
                             </div>
                                 
-                                <!-- Recipe table -->
+                            <!-- Row 3: Recipe Table -->
                             <div class="item-recipes">
+                                <h6 class="recipe-title">Recipe</h6>
                                 <table>
                                     <thead>
                                         <tr>
                                             <th class="recipe-image"></th>
-                                            <th class="recipe-quantity">Quantity</th>
                                             <th class="recipe-name">Resource</th>
-                                            <th class="recipe-price">Price</th>
+                                            <th class="recipe-quantity">Qty</th>
+                                            <th class="recipe-price">Unit</th>
+                                            <th class="recipe-price">Total</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -145,26 +115,83 @@
                                                     onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;"
                                                 >
                                             </td>
-                                            <td>{{ recipe.quantity }}</td>
                                             <td>{{ recipe.resource_name }}</td>
+                                            <td>{{ recipe.quantity }}</td>
                                             <td>{{ recipe.resource_price }}</td>
+                                            <td>{{ recipe.total_price }}</td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>                                
-                            </div>
                         </div>
                     </div>
-                    {% endfor %}
-                    
-                {% else %}
-                <div class="alert alert-info">
-                    Your craft list is currently empty. Add items from the item detail pages.
                 </div>
-                {% endif %}
+            </div>
+            {% endfor %}
+
+            {% if not items %}
+            <div class="alert alert-info">
+                Your craft list is currently empty. Add items from the item detail pages.
+            </div>
+            {% endif %}
+        </div>
+    </div>      
+    <div class="item-detail-right">
+        {% if items %}
+        <div class="resources-section mb-5">
+            <h4>Resources</h4>
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header mt-3">
+                            <h4 class="ressource-title">Total Resources Needed</h4>
+                            <div class="total-cost">
+                                <strong>Total Cost:</strong> 
+                                {% if total_cost != "N/A" %}
+                                    {{ total_cost }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="card-header mt-3">
+                            <h4 class="ressource-title"></h4>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th class="resource-image"></th>
+                                        <th class="resource-name">Resource</th>
+                                        <th class="resource-quantity">Qty</th>
+                                        <th class="resource-price">Unit</th>
+                                        <th class="resource-price">Total</th>
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for resource in all_resources %}
+                                    <tr>
+                                        <td>
+                                            <img 
+                                                src="{{ resource.resource_image }}" 
+                                                alt="{{ resource.resource_name }}"
+                                                onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;"
+                                            >
+                                        </td>
+                                        <td>{{ resource.resource_name }}</td>
+                                        <td>{{ resource.quantity }}</td>
+                                        <td>{{ resource.resource_price }}</td>
+                                        <td>{{ resource.total_cost }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+        {% endif %}
     </div>
 </div>
 

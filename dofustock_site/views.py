@@ -13,7 +13,7 @@ import re
 from django.db.models import Case, When, IntegerField, Value
 from django.template.defaultfilters import floatformat
 
-from .utils import sanitize_filename
+from .utils import sanitize_filename , calculate_craft_cost , format_craft_cost
 # Create your views here.
 def index(request):
 
@@ -86,7 +86,7 @@ def item_detail(request, ankama_id):
             latest_price = item.prices.latest('date_updated')
             if latest_price.price is not None:
                 if latest_price.price == 0:
-                    item.price = "Free"
+                    item.price = "No Data"
                 else:
                     # Format with spaces
                     price_int = int(latest_price.price)
@@ -107,8 +107,7 @@ def item_detail(request, ankama_id):
         
         # Fetch recipes with full resource details
         recipes = []
-        total_craft_cost = 0
-        all_prices_available = True
+        total_craft_cost, all_prices_available = calculate_craft_cost(item)
         
         for recipe in item.recipes.all():
             recipe_dict = {
@@ -127,8 +126,8 @@ def item_detail(request, ankama_id):
                     resource_price = resource_item.prices.latest('date_updated')
                     if resource_price.price is not None:
                         if resource_price.price == 0:
-                            recipe_dict['unit_price'] = "Free"
-                            recipe_dict['total_price'] = "Free"
+                            recipe_dict['unit_price'] = "No Data"
+                            recipe_dict['total_price'] = "No Data"
                         else:
                             # Store the numeric values
                             unit_price = int(resource_price.price)
@@ -137,31 +136,22 @@ def item_detail(request, ankama_id):
                             # Format prices
                             recipe_dict['unit_price'] = f"{unit_price:,}".replace(',', ' ')
                             recipe_dict['total_price'] = f"{total_price:,}".replace(',', ' ')
-                            
-                            # Add to total craft cost
-                            total_craft_cost += total_price
                     else:
                         recipe_dict['unit_price'] = "N/A"
                         recipe_dict['total_price'] = "N/A"
-                        all_prices_available = False
                 except:
                     recipe_dict['unit_price'] = "N/A"
                     recipe_dict['total_price'] = "N/A"
-                    all_prices_available = False
                     
             except Item.DoesNotExist:
                 recipe_dict['resource_image'] = '/media/IMG/equipment/Outil/489-Loupe.png'
                 recipe_dict['unit_price'] = "N/A"
                 recipe_dict['total_price'] = "N/A"
-                all_prices_available = False
             
             recipes.append(recipe_dict)
         
         # Format the total craft cost
-        if all_prices_available:
-            item.craft_cost = f"{total_craft_cost:,}".replace(',', ' ')
-        else:
-            item.craft_cost = "Incomplete"
+        item.craft_cost = format_craft_cost(total_craft_cost, all_prices_available)
         
         effects = list(item.effects.values())
         
@@ -194,14 +184,23 @@ def get_items(request):
         item_type=item_type
     ).values()
     
-    # Convert to list and add price info
+    # Convert to list and add price and craft cost info
     items_list = list(items)
     for item in items_list:
+        # Add regular price
         try:
             latest_price = Price.objects.filter(item_id=item['id']).latest('date_updated')
             item['price'] = str(latest_price.price)
         except:
             item['price'] = "N/A"
+        
+        # Calculate craft cost
+        try:
+            item_obj = Item.objects.get(id=item['id'])
+            total_craft_cost, all_prices_available = calculate_craft_cost(item_obj)
+            item['craft_cost'] = format_craft_cost(total_craft_cost, all_prices_available)
+        except:
+            item['craft_cost'] = "N/A"
     
     return JsonResponse(items_list, safe=False)
 
@@ -229,14 +228,23 @@ def search_items(request):
         )
     ).order_by('-relevance')  # Sort by relevance, highest first
     
-    # Convert to list and add price info
+    # Convert to list and add price and craft cost info
     items_list = list(items.values())
     for item in items_list:
+        # Add regular price
         try:
             latest_price = Price.objects.filter(item_id=item['id']).latest('date_updated')
             item['price'] = str(latest_price.price)
         except:
             item['price'] = "N/A"
+        
+        # Calculate craft cost
+        try:
+            item_obj = Item.objects.get(id=item['id'])
+            total_craft_cost, all_prices_available = calculate_craft_cost(item_obj)
+            item['craft_cost'] = format_craft_cost(total_craft_cost, all_prices_available)
+        except:
+            item['craft_cost'] = "N/A"
     
     return JsonResponse(items_list, safe=False)
 
@@ -374,17 +382,29 @@ def craft_list(request):
         # Get the latest price for this item
         try:
             latest_price = item.prices.latest('date_updated')
-            item_price = latest_price.price
+            if latest_price.price is not None:
+                if latest_price.price == 0:
+                    item_price = "No Data"
+                else:
+                    # Format with spaces - same as in item_detail
+                    price_int = int(latest_price.price)
+                    item_price = f"{price_int:,}".replace(',', ' ')
+            else:
+                item_price = "N/A"
         except:
             item_price = "N/A"
             
+        total_craft_cost, all_prices_available = calculate_craft_cost(item)
+        craft_cost = format_craft_cost(total_craft_cost, all_prices_available)
+
         item_data = {
             'ankama_id': item.ankama_id,
             'name': item.name,
             'category': item.category,
             'item_type': item.item_type,
             'level': item.level,
-            'price': item_price,  # Add the price here
+            'price': item_price,
+            'craft_cost': craft_cost,
             'sanitized_name': sanitize_filename(item.name),
             'recipes': []
         }
@@ -405,10 +425,24 @@ def craft_list(request):
                 
                 # Get resource price if available
                 try:
-                    resource_price = resource_item.prices.latest('date_updated').price
-                    recipe_dict['resource_price'] = resource_price
+                    resource_price_obj = resource_item.prices.latest('date_updated')
+                    if resource_price_obj.price is not None:
+                        if resource_price_obj.price == 0:
+                            recipe_dict['resource_price'] = "No Data"
+                            recipe_dict['total_price'] = "No Data"
+                        else:
+                            # Format resource price with spaces
+                            price_int = int(resource_price_obj.price)
+                            recipe_dict['resource_price'] = f"{price_int:,}".replace(',', ' ')
+                            # Calculate and format total price (price * quantity)
+                            total_price = price_int * recipe.quantity
+                            recipe_dict['total_price'] = f"{total_price:,}".replace(',', ' ')
+                    else:
+                        recipe_dict['resource_price'] = "N/A"
+                        recipe_dict['total_price'] = "N/A"
                 except:
                     recipe_dict['resource_price'] = "N/A"
+                    recipe_dict['total_price'] = "N/A"
                 
                 # Add to total resources
                 resource_key = str(recipe.resource_id)
@@ -450,9 +484,11 @@ def craft_list(request):
     can_calculate_total = True
     
     for resource in all_resources:
-        if resource['resource_price'] != "N/A":
+        if resource['resource_price'] != "N/A" and resource['resource_price'] != "No Data":
             try:
-                resource_cost = float(resource['resource_price']) * resource['quantity']
+                # Extract numeric value from formatted price string
+                numeric_price = float(resource['resource_price'].replace(' ', ''))
+                resource_cost = numeric_price * resource['quantity']
                 resource['total_cost'] = resource_cost
                 total_cost += resource_cost
             except (ValueError, TypeError):
@@ -462,11 +498,23 @@ def craft_list(request):
             can_calculate_total = False
             resource['total_cost'] = "N/A"
     
+    # Format the total costs of individual resources
+    for resource in all_resources:
+        if resource['total_cost'] != "N/A":
+            # Format with spaces
+            resource['total_cost'] = f"{int(resource['total_cost']):,}".replace(',', ' ')
+    
+    # Format the grand total cost
+    if can_calculate_total:
+        total_cost_formatted = f"{int(total_cost):,}".replace(',', ' ')
+    else:
+        total_cost_formatted = "N/A"
+    
     return render(request, "dofustock/craft_list.html", {
         "items": items_with_recipes,
         "craftlist": set(items.values_list("ankama_id", flat=True)),
         "all_resources": all_resources,
-        "total_cost": total_cost if can_calculate_total else "N/A"
+        "total_cost": total_cost_formatted
     })
 
 def toggle_craftlist(request, ankama_id):

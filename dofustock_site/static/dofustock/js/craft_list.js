@@ -1,6 +1,9 @@
 // craft_list.js - Craft list management functionality
+// Update initCraftList function
 function initCraftList() {
-    // Set up event listeners for ALL remove buttons in craft list at load time
+    // Set container reference to the new structure
+    window.craftListContainer = document.querySelector('.item-detail-container');
+    
     if (window.craftListContainer) {
         // Find all existing remove buttons and attach event listeners
         document.querySelectorAll('.remove-from-craft-list').forEach(button => {
@@ -11,10 +14,12 @@ function initCraftList() {
             });
         });
         
-        // Also set up event delegation for dynamically added buttons
+        // Event delegation for the new structure
         window.craftListContainer.addEventListener('click', async event => {
-            if (event.target.classList.contains('remove-from-craft-list')) {
-                const itemId = event.target.getAttribute('data-item-id');
+            // Using closest to handle clicks on the button or its child image
+            const button = event.target.closest('.remove-from-craft-list');
+            if (button) {
+                const itemId = button.getAttribute('data-item-id');
                 console.log('Remove button clicked through delegation for item:', itemId);
                 await toggleCraftlistItem(itemId, true);
             }
@@ -22,26 +27,54 @@ function initCraftList() {
     }
 }
 
-// Function to create a craft list item card
+// Update the function to match the new card structure
 function createCraftListItemCard(item) {
     const cardDiv = document.createElement('div');
-    cardDiv.className = 'col-md-4 mb-3';
+    cardDiv.className = 'row mb-3';
     cardDiv.id = `craft-item-${item.ankama_id}`;
     
     const sanitizedName = window.sanitizeFilename(item.name);
     const imagePath = `/media/IMG/${item.category}/${item.item_type}/${item.ankama_id}-${sanitizedName}.png`;
     
+    // Match the new structure
     cardDiv.innerHTML = `
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">${item.name}</h5>
-                <img src="${imagePath}" 
-                    alt="${item.name}"
-                    onerror="this.src='${window.FALLBACK_IMAGE}'; this.onerror=null;">
-                <p class="card-text">Level: ${item.level}</p>
-                <p class="card-text">Category: ${item.category}</p>
-                <a href="/item/${item.ankama_id}/" class="btn btn-primary btn-sm">View Details</a>
-                <button type="button" class="btn btn-danger btn-sm remove-from-craft-list" data-item-id="${item.ankama_id}">Remove</button>
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="item-image mr-3">
+                            <img src="${imagePath}" 
+                                alt="${item.name}" class="item_img"
+                                onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;">
+                        </div>
+                        <h5 class="card-title mb-0 flex-grow-1">${item.name}</h5>
+                        <div class="button-actions d-flex">
+                            <button type="button" 
+                                    class="btn btn-sm remove-from-craft-list" 
+                                    data-item-id="${item.ankama_id}">
+                                <img class="trash icon-small" src="/media/Icon/trash.png" alt="delete">
+                            </button>
+                            <a href="/item/${item.ankama_id}/" 
+                            class="btn btn-sm">
+                                <img class="info icon-small" src="/media/Icon/info.png" alt="details">
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="item-metadata mb-3">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p class="card-text"><span>${item.item_type} - Level:</span> ${item.level}</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="card-text"><strong>Price:</strong> ${item.price}</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="card-text"><strong>Craft Cost:</strong> ${item.craft_cost}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     `;

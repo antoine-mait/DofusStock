@@ -4,6 +4,25 @@ span{
 .card{
     box-shadow: -4px 4px 10px rgba(0,0,0,0.08);
 }
+.item-detail-container {
+    max-width: 95%;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1), -4px 4px 10px rgba(0,0,0,0.08);
+    display: flex;
+    gap: 30px;
+}
+
+.item-detail-left {
+    flex: 1;
+    min-width: 0; /* Prevent flex item from overflowing */
+}
+
+.item-detail-right {
+    flex: 1;
+    min-width: 0; /* Prevent flex item from overflowing */
+}
 
 .card-body > .d-flex:first-child {
     margin-bottom: 10px;
@@ -71,14 +90,25 @@ span{
 .item-image {
     display: flex;
     align-items: flex-start;
-    margin-left: 10px;
+    margin-right: 15px;
+}
+.item-image .item_img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
 }
 
 /* Button styles */
 .btn-sm {
     width: 100%;
 }
-
+.button-actions {
+    display: flex;
+    gap: 10px;
+}
 .flex-column .btn-sm {
     margin-bottom: 5px;
 }
@@ -96,15 +126,14 @@ span{
     
 }
 
- /* Recipe table style */
-
-.item-recipes table {
+/* Recipe table style - Applied to both item recipes and total resources */
+.item-recipes table, .resources-section table {
     width: 100%;
     border-collapse: collapse;
-    
 }
 
-.item-recipes th, .item-recipes td {
+.item-recipes th, .item-recipes td,
+.resources-section th, .resources-section td {
     font-size: 14px;
     border: 1px solid #ddd;
     padding: 8px;
@@ -112,29 +141,63 @@ span{
     text-align: center;
 }
 
-.item-recipes th {
+.item-recipes th, .resources-section th {
     background-color: #f2f2f2;
-    text-align: left;
+    text-align: center;
 }
 
-.item-recipes .recipe-image {
+.item-recipes .recipe-image, .resources-section .resource-image {
     width: 10%;
-    text-align: left;
+    text-align: center;
 }
 
-.item-recipes .recipe-quantity {
-    
+.item-recipes .recipe-quantity, .resources-section .resource-quantity {
     width: 15%;
-    text-align: left;
+    text-align: center;
 }
 
-.item-recipes .recipe-name {
-    width: 75%;
-    text-align: left;
+.item-recipes .recipe-name, .resources-section .resource-name {
+    width: 50%;
+    text-align: center;
 }
 
-.item-recipes img {
+.resources-section .resource-price {
+    width: 15%;
+    text-align: center;
+}
+
+.item-recipes img, .resources-section img {
     max-width: 25px;
     max-height: auto;
     object-fit: contain;
+}
+
+/* Additional styles for resources section */
+.total-cost {
+    margin-top: 10px;
+    font-size: 16px;
+    color: #333;
+}
+
+.ressource-title {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.card-title {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.item-metadata {
+    padding: 8px 0;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+}
+
+.item-recipes h6.recipe-title {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-weight: bold;
 }
