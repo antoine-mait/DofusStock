@@ -325,9 +325,6 @@ h3 .price-better, h3 .price-worse {
     font-weight: normal;
 }
 
-.btn-success {
-    background-color: var( --color-navbar) !important; 
-  }
 
 /* Media Queries - All consolidated at the end */
 @media (max-width: 576px) {
