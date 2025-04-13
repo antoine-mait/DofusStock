@@ -1,12 +1,21 @@
+/* Base elements */
 span {
     font-weight: bold;
 }
-
+#results-title , h4{
+    margin-bottom: 0px; 
+}
+.h4-resource{
+    margin-bottom: -15px;
+    margin-top: -10px;
+}
 .card {
     box-shadow: -4px 4px 10px rgba(0,0,0,0.08);
-    margin-bottom: 20px;
+    margin-bottom: 0px;
+    height: 100%;
 }
 
+/* Layout containers */
 .item-detail-container {
     max-width: 95%;
     margin: 0 auto;
@@ -16,11 +25,13 @@ span {
     display: block; 
 }
 
-/* Header sections */
 .craft-header {
-    margin-bottom: 30px;
+    margin-bottom: 5px;
 }
 
+.card-header{
+    padding: 0;
+}
 .card-header h2 {
     margin-bottom: 0;
 }
@@ -46,20 +57,13 @@ span {
 .craft-list-container {
     display: grid;
     gap: 20px;
-    margin-bottom: 30px;
+    margin-bottom: 0px;
+    grid-template-columns: 1fr;
 }
 
-/* Item card styling */
-.craft-list-container .card {
-    height: 100%;
-    transition: transform 0.2s;
-}
-
-.craft-list-container .card:hover {
-    transform: translateY(-5px);
-}
-
+/* Item styling */
 .item-image {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     margin-right: 15px;
@@ -82,17 +86,23 @@ span {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    min-width: 0;
+    margin-right: 10px;
 }
 
 .card-text {
+    margin-bottom: 2px;
     font-size: 14px !important;
     margin-bottom: 5px;
+    line-height: 1.1;
 }
 
 /* Button styling */
 .button-actions {
     display: flex;
     gap: 10px;
+    margin-left: auto;
+    flex-shrink: 0;
 }
 
 .icon-small {
@@ -111,7 +121,11 @@ span {
     border-radius: 4px;
 }
 
-/* Item container in extracted items list */
+.add-to-craftlist-btn {
+    min-width: 20px;
+}
+
+/* Item container */
 .item-container {
     display: grid;
     grid-template-columns: auto 2fr auto;
@@ -121,21 +135,22 @@ span {
     border-radius: 4px;
     background-color: #f9f9f9;
 }
+
 .items-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Default: 2 items per row */
+    grid-template-columns: repeat(2, 1fr);
     gap: 15px;
     width: 100%;
-}
-.add-to-craftlist-btn {
-    min-width: 20px;
 }
 
 /* Item metadata section */
 .item-metadata {
-    padding: 10px 0;
+    padding: 5px 0;
     border-top: 1px solid #eee;
     border-bottom: 1px solid #eee;
+}
+.item-metadata.mb-3 {
+    margin-bottom: 0.5rem !important; /* Reduce from 1rem (mb-3) */
 }
 
 .item-metadata .row {
@@ -160,7 +175,7 @@ span {
 .resources-section table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 0;
+    margin-top: -10px;
 }
 
 .item-recipes th, 
@@ -177,31 +192,26 @@ span {
 .item-recipes th, 
 .resources-section th {
     background-color: #f2f2f2;
-    text-align: center;
 }
 
 .item-recipes .recipe-image, 
 .resources-section .resource-image {
     width: 10%;
-    text-align: center;
 }
 
 .item-recipes .recipe-quantity, 
 .resources-section .resource-quantity {
     width: 15%;
-    text-align: center;
 }
 
 .item-recipes .recipe-name, 
 .resources-section .resource-name {
     width: 50%;
-    text-align: center;
 }
 
 .item-recipes .recipe-price,
 .resources-section .resource-price {
     width: 15%;
-    text-align: center;
 }
 
 .item-recipes img, 
@@ -212,29 +222,33 @@ span {
 }
 
 /* Total resources section */
+.card-header-resources {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 15px;
+    width: 100%;
+  }
+
 .resources-section {
-    margin-top: 40px;
-    margin-bottom: 40px;
+    margin: 0px;
 }
 
-.resources-section h4 {
-    margin-bottom: 20px;
-}
-
-.total-cost {
-    margin-top: 10px;
+.total-cost, .resource-title {
+    margin: 0;
+    padding: 0;
+    margin-top: 5px;
+    margin-bottom: 5px;
     font-size: 16px;
     color: #333;
     text-align: right;
     font-weight: bold;
 }
-
-.ressource-title {
-    font-size: 18px;
-    margin-bottom: 10px;
+.total-cost {
+    text-align: right;
+    white-space: nowrap;
 }
-
-/* No items message */
+/* Messages and indicators */
 .alert-info {
     background-color: #e8f4f8;
     border-color: #bee5eb;
@@ -243,20 +257,21 @@ span {
     border-radius: 4px;
 }
 
-/* Loading indicator */
 #loading {
     text-align: center;
     padding: 20px;
 }
 
+/* Pricing */
 .prices p {
-    margin-bottom: 2px; /* Reduce the bottom margin */
-    line-height: 1.2; /* Reduce the line height */
+    margin-bottom: 2px;
+    line-height: 1.2;
 }
 
 .price-better {
     color: green;
 }
+
 .price-worse {
     color: red;
 }
@@ -275,16 +290,100 @@ span {
 .prices {
     padding: 0;
 }
+
 .unit-price {
     border-bottom: 1px solid #ddd;
+}
+
+.d-flex.align-items-center.mb-3 {
+    flex-wrap: wrap;
+    align-items: flex-start !important;
+    margin-bottom: 0.5rem !important;
 }
 
 h3 .price-better, h3 .price-worse {
     font-weight: normal;
 }
+
+/* Media Queries - All consolidated at the end */
+@media (max-width: 576px) {
+    .item-metadata .row {
+        flex-direction: column;
+    }
+    
+    .item-metadata .col-md-4 {
+        flex: 0 0 100%;
+        max-width: 100%;
+        margin-bottom: 5px;
+        text-align: center;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 900px) {
+    .item-metadata .row {
+        display: flex;
+        justify-content: center;
+        text-align: center;
+    }
+    
+    .item-metadata .col-md-4 {
+        flex: 0 0 auto;
+        padding: 0 15px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 850px) {
+    .d-flex.align-items-center.mb-3 {
+        display: flex !important;
+        flex-wrap: nowrap !important; 
+        width: 100%;
+        justify-content: space-between;
+        align-items: center !important;
+    }
+    
+    .item-image {
+        flex: 0 0 40px;
+        width: 40px;
+        margin-right: 10px;
+    }
+    
+    .card-title {
+        flex: 1 1 auto;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin-right: 10px;
+        min-width: 100px; 
+    }
+    
+    .button-actions {
+        flex: 0 0 auto;
+        margin-left: auto;
+    }
+    
+    .item-metadata .row {
+        flex-direction: column;
+    }
+    
+    .item-metadata .col-md-4 {
+        flex: 0 0 100%;
+        max-width: 100%;
+        margin-bottom: 5px;
+    }
+    
+    .button-actions {
+        gap: 5px;
+    }
+}
+
 @media (min-width: 900px) {
     .craft-list-container {
         grid-template-columns: 1fr;
+    }
+    
+    .items-grid {
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 
@@ -292,31 +391,17 @@ h3 .price-better, h3 .price-worse {
     .craft-list-container {
         grid-template-columns: repeat(2, 1fr);
     }
-}
-
-@media (min-width: 1600px) {
-    .craft-list-container {
-        grid-template-columns: repeat(3, 1fr); /* Maximum 3 per row */
-
-    }
-}
-
-/* Medium screens: 3 items per row */
-@media (min-width: 900px) {
-    .items-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-/* Large screens: 4 items per row */
-@media (min-width: 1300px) {
+    
     .items-grid {
         grid-template-columns: repeat(4, 1fr);
     }
 }
 
-/* Extra large screens: 5 items per row */
 @media (min-width: 1600px) {
+    .craft-list-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
     .items-grid {
         grid-template-columns: repeat(5, 1fr);
     }

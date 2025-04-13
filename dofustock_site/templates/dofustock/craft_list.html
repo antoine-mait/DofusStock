@@ -159,12 +159,12 @@
     <div class="item-detail-right">
         {% if items %}
         <div class="resources-section mb-5">
-            <h4>Resources</h4>
+            <h4 class="h4-resource">Resources</h4>
             <div class="row mt-4">
                 <div class="col-12">
                     <div class="card">
-                        <div class="card-header mt-3">
-                            <h4 class="ressource-title">Total Resources Needed</h4>
+                        <div class="card-header-resources">
+                            <h4 class="resource-title">Total Resources Needed</h4>
                             <div class="total-cost">
                                 <strong>Total Cost:</strong> 
                                 {% if total_cost != "N/A" %}
@@ -174,8 +174,7 @@
                                 {% endif %}
                             </div>
                         </div>
-                        <div class="card-header mt-3">
-                            <h4 class="ressource-title"></h4>
+                        <div class="card-header">
                             <table>
                                 <thead>
                                     <tr>

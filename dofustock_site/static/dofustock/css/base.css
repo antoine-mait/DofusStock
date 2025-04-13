@@ -10,19 +10,3 @@ a, a:hover, a:active, a:focus {
     text-decoration: none;
     outline: none;
 }
-
-@media (max-width: 768px) {
-    .item-details-header, .item-details-row {
-        flex-direction: column;
-    }
-
-    .item-image {
-        flex: 0 0 auto;
-        width: 100%;
-    }
-
-    .item-metadata {
-        text-align: center;
-        margin-top: 10px;
-    }
-}

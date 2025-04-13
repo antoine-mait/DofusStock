@@ -19,44 +19,45 @@
     </head>
     <body>
         {% csrf_token %}
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="#">DofuStonk</a>
-          
-            <div>
-              <ul class="navbar-nav mr-auto">
-                {% if user.is_authenticated %}
+        <div class="navbar-center">
+            <nav class="navbar navbar-expand-lg ">
+                <a class="navbar-brand" href="#">DofuStonk</a>
+            
+                <div>
+                <ul class="navbar-nav mr-auto">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link">
+                                <strong>{{ user.username }}</strong>
+                            </a>
+                        </li>
+                    
+                    {% endif %}
                     <li class="nav-item">
-                        <a class="nav-link">
-                            <strong>{{ user.username }}</strong>
-                        </a>
-                    </li>
-                  
-                {% endif %}
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'index' %}">All Builds</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'encyclopedie' %}">Encyclopédie</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'craft_list' %}">Craft list</a>
-                </li>
-                {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">Log In</a>
+                    <a class="nav-link" href="{% url 'index' %}">All Builds</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'register' %}">Register</a>
+                        <a class="nav-link" href="{% url 'encyclopedie' %}">Encyclopédie</a>
                     </li>
-                {% endif %}
-              </ul>
-            </div>
-          </nav>
-        
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'craft_list' %}">Craft list</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Log In</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'register' %}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
+                </div>
+            </nav>
+        </div>
         <div class="body">
             {% block body %}
             {% endblock %}

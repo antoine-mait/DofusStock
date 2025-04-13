@@ -1,0 +1,33 @@
+.navbar-center{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #d3d3d3fd;
+}
+/* Add these new styles */
+.navbar {
+    width: 100%;
+    justify-content: center;
+}
+
+.navbar-nav {
+    flex-direction: row !important; /* Force horizontal layout */
+    flex-wrap: nowrap !important; /* Prevent wrapping */
+}
+
+.nav-item {
+    white-space: nowrap;
+    padding: 0 10px; /* Add some spacing between items */
+}
+
+/* For smaller screens, reduce padding if needed */
+@media (max-width: 990px) {
+    .nav-item {
+        padding: 0 5px;
+    }
+    
+    /* Optional: reduce font size slightly if needed */
+    .nav-link {
+        font-size: 0.9rem;
+    }
+}
