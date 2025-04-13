@@ -1,4 +1,7 @@
-/* Import all style files */
+/* Import colors first */
+@import 'colors.css';
+
+/* Then import other style files */
 @import 'base.css';
 @import 'layout.css';
 /* @import 'encyclopedia.css';

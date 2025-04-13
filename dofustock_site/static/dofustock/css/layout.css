@@ -2,7 +2,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #d3d3d3fd;
+    background-color: var(--color-navbar);
 }
 /* Add these new styles */
 .navbar {

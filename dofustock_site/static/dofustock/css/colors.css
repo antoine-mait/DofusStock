@@ -1,0 +1,268 @@
+/* Base theme (light mode) */
+:root {
+  /* Light mode colors */
+  --color-text: #333;
+  --color-text-secondary: #7f8c8d;
+  --color-text-heading: #2c3e50;
+  --color-background: #f4f4f4;
+  --color-background-light: #f9f9f9;
+  --color-background-lighter: #f5f5f5;
+  --color-navbar: #d3d3d3fd;
+  --color-card-bg: white;
+  --color-button-bg: #e0e0e0;
+  --color-button-hover: #e0e0e0;
+  --color-border: #ddd;
+  --color-border-light: #eee; 
+  --color-table-header: #f2f2f2;
+  
+  /* Accent colors */
+  --effect-chance: #3498db;       /* Blue */
+  --effect-prospection: #1aa4bc;  /* Turquoise */
+  --effect-wisdom: #9b59b6;       /* Purple */
+  --effect-strength: #7c4600;     /* Red */
+  --effect-intelligence: #f31212; /* Orange */
+  --effect-agility: #00c410;      /* Green */
+  --effect-vitality: #e62222;     /* Dark Orange */
+  --effect-power: #770263;        /* Burgundy */
+  --effect-critical: #d30000;     /* Burnt Orange */
+  --effect-neutral: #7f8c8d;      /* Gray - default */
+  --effect-soin : #ff00dd;
+  --color-success: green;
+  --color-danger: red;
+  
+  /* Alert colors */
+  --color-alert-info-bg: #e8f4f8;
+  --color-alert-info-border: #bee5eb;
+  --color-alert-info-text: #0c5460;
+  
+  /* Shadow colors */
+  --shadow-light: rgba(0, 0, 0, 0.08);
+  --shadow-medium: rgba(0, 0, 0, 0.1);
+  --shadow-dark: rgba(0, 0, 0, 0.2);
+}
+/* Dofusbook theme */
+[data-theme="dofusbook"] {
+ --color-text: #e0e0e0;
+ --color-text-secondary: #a0a0a0;
+ --color-text-heading: #ffffff;
+ --color-text-mid:#333333;
+ --color-background: #1c1c1c;
+ --color-background-light: #2a2a2a;
+ --color-background-lighter: #333333;
+ --color-navbar: #67a84d;
+ --color-card-bg: #2d2d2d;
+ --color-button-bg: #67a84d;
+ --color-button-hover: #5a9440;
+ --color-border: #444444;
+ --color-border-light: #555555; 
+ --color-table-header: #333333;
+ 
+ /* Accent colors */
+ --color-accent-blue: #3498db;
+ --color-success: #67a84d;
+ --color-danger: #e74c3c;
+ 
+ /* Alert colors */
+ --color-alert-info-bg: #2c3e50;
+ --color-alert-info-border: #3498db;
+ --color-alert-info-text: #d5e8f4;
+ 
+ /* Shadow colors */
+ --shadow-light: rgba(0, 0, 0, 0.2);
+ --shadow-medium: rgba(0, 0, 0, 0.35);
+ --shadow-dark: rgba(0, 0, 0, 0.5);
+}
+
+/* Base light theme structure like Ivoire */
+
+/* Emeraude theme - Green */
+[data-theme="emeraude"] {
+  --color-text: #1b3c17;
+  --color-text-secondary: #2d5a26;
+  --color-text-heading: #0d2e0a;
+  --color-background: #eaf7e8;
+  --color-background-light: #f0fbef;
+  --color-background-lighter: #f5fff5;
+  --color-navbar: #b8e6b4;
+  --color-card-bg: #f0fbef;
+  --color-button-bg: #7bc376;
+  --color-button-hover: #5daa57;
+  --color-border: #b8e6b4;
+  --color-border-light: #d4f0d2;
+  --color-table-header: #f0fbef;
+  
+  /* Accent colors */
+  --color-accent-blue: #5daa57;
+  --color-success: #4c8c47;
+  --color-danger: #bf360c;
+  
+  /* Alert colors */
+  --color-alert-info-bg: #f5fff5;
+  --color-alert-info-border: #7bc376;
+  --color-alert-info-text: #1b3c17;
+  
+  /* Shadow colors */
+  --shadow-light: rgba(93, 170, 87, 0.15);
+  --shadow-medium: rgba(93, 170, 87, 0.25);
+  --shadow-dark: rgba(93, 170, 87, 0.35);
+}
+
+/* Ocre theme - Golden/Amber */
+[data-theme="ocre"] {
+  --color-text: #5f4500;
+  --color-text-secondary: #7d5c00;
+  --color-text-heading: #4e3800;
+  --color-background: #fff4d6;
+  --color-background-light: #fff9e4;
+  --color-background-lighter: #fffcec;
+  --color-navbar: #ffd95b;
+  --color-card-bg: #fff9e4;
+  --color-button-bg: #ffca28;
+  --color-button-hover: #ffb300;
+  --color-border: #ffd95b;
+  --color-border-light: #ffe082;
+  --color-table-header: #fff9e4;
+  
+  /* Accent colors */
+  --color-accent-blue: #ffb300;
+  --color-success: #ffa000;
+  --color-danger: #bf360c;
+  
+  /* Alert colors */
+  --color-alert-info-bg: #fffcec;
+  --color-alert-info-border: #ffca28;
+  --color-alert-info-text: #5f4500;
+  
+  /* Shadow colors */
+  --shadow-light: rgba(255, 179, 0, 0.15);
+  --shadow-medium: rgba(255, 179, 0, 0.25);
+  --shadow-dark: rgba(255, 179, 0, 0.35);
+}
+
+/* Turquoise theme - Blue-Green */
+[data-theme="turquoise"] {
+  --color-text: #00565e;
+  --color-text-secondary: #006974;
+  --color-text-heading: #00464e;
+  --color-background: #e0f7fa;
+  --color-background-light: #e8fafd;
+  --color-background-lighter: #f0feff;
+  --color-navbar: #80deea;
+  --color-card-bg: #e8fafd;
+  --color-button-bg: #4dd0e1;
+  --color-button-hover: #26c6da;
+  --color-border: #80deea;
+  --color-border-light: #b2ebf2;
+  --color-table-header: #e8fafd;
+  
+  /* Accent colors */
+  --color-accent-blue: #00acc1;
+  --color-success: #00bcd4;
+  --color-danger: #bf360c;
+  
+  /* Alert colors */
+  --color-alert-info-bg: #f0feff;
+  --color-alert-info-border: #4dd0e1;
+  --color-alert-info-text: #00565e;
+  
+  /* Shadow colors */
+  --shadow-light: rgba(0, 172, 193, 0.15);
+  --shadow-medium: rgba(0, 172, 193, 0.25);
+  --shadow-dark: rgba(0, 172, 193, 0.35);
+}
+
+/* Pourpre theme - Red/Orange */
+[data-theme="pourpre"] {
+  --color-text: #7f2200;
+  --color-text-secondary: #9f2b00;
+  --color-text-heading: #691c00;
+  --color-background: #fff0e8;
+  --color-background-light: #fff5f0;
+  --color-background-lighter: #fffaf8;
+  --color-navbar: #ffab91;
+  --color-card-bg: #fff5f0;
+  --color-button-bg: #ff8a65;
+  --color-button-hover: #ff7043;
+  --color-border: #ffab91;
+  --color-border-light: #ffccbc;
+  --color-table-header: #fff5f0;
+  
+  /* Accent colors */
+  --color-accent-blue: #ff5722;
+  --color-success: #f4511e;
+  --color-danger: #bf360c;
+  
+  /* Alert colors */
+  --color-alert-info-bg: #fffaf8;
+  --color-alert-info-border: #ff8a65;
+  --color-alert-info-text: #7f2200;
+  
+  /* Shadow colors */
+  --shadow-light: rgba(255, 87, 34, 0.15);
+  --shadow-medium: rgba(255, 87, 34, 0.25);
+  --shadow-dark: rgba(255, 87, 34, 0.35);
+}
+
+/* Ivoire theme - Cream with golden swirls (unchanged as it's the model) */
+[data-theme="ivoire"] {
+  --color-text: #5d4037;
+  --color-text-secondary: #7d6055;
+  --color-text-heading: #4e342e;
+  --color-background: #f5eed6;
+  --color-background-light: #f9f4e4;
+  --color-background-lighter: #fdf9ec;
+  --color-navbar: #e8d9b2;
+  --color-card-bg: #fcf7e8;
+  --color-button-bg: #e0c98e;
+  --color-button-hover: #d4ba76;
+  --color-border: #e8d9b2;
+  --color-border-light: #f0e4c8;
+  --color-table-header: #f9f4e4;
+  
+  /* Accent colors */
+  --color-accent-blue: #d4ba76;
+  --color-success: #c0a655;
+  --color-danger: #bf360c;
+  
+  /* Alert colors */
+  --color-alert-info-bg: #fdf9ec;
+  --color-alert-info-border: #e0c98e;
+  --color-alert-info-text: #7d6055;
+  
+  /* Shadow colors */
+  --shadow-light: rgba(212, 186, 118, 0.15);
+  --shadow-medium: rgba(212, 186, 118, 0.25);
+  --shadow-dark: rgba(212, 186, 118, 0.35);
+}
+
+/* Ébène theme - Dark brown with purple accent */
+[data-theme="ebene"] {
+  --color-text: #5d4037;
+  --color-text-secondary: #7d6055;
+  --color-text-heading: #4e342e;
+  --color-background: #e8e0d8;
+  --color-background-light: #f0e8e0;
+  --color-background-lighter: #f8f0e8;
+  --color-navbar: #bcaaa4;
+  --color-card-bg: #f0e8e0;
+  --color-button-bg: #a1887f;
+  --color-button-hover: #8d6e63;
+  --color-border: #bcaaa4;
+  --color-border-light: #d7ccc8;
+  --color-table-header: #f0e8e0;
+  
+  /* Accent colors with burgundy touch to match image */
+  --color-accent-blue: #8d6e63;
+  --color-success: #795548;
+  --color-danger: #bf360c;
+  
+  /* Alert colors */
+  --color-alert-info-bg: #f8f0e8;
+  --color-alert-info-border: #a1887f;
+  --color-alert-info-text: #5d4037;
+  
+  /* Shadow colors */
+  --shadow-light: rgba(141, 110, 99, 0.15);
+  --shadow-medium: rgba(141, 110, 99, 0.25);
+  --shadow-dark: rgba(141, 110, 99, 0.35);
+}

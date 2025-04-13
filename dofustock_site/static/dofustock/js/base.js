@@ -22,6 +22,23 @@ document.addEventListener('DOMContentLoaded', () => {
     initUrlExtractor();
 });
 
+// Theme switching functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const themeSelect = document.getElementById('theme-select');
+    
+    // Check for saved theme preference or use default
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    themeSelect.value = savedTheme;
+    
+    // Add event listener for theme change
+    themeSelect.addEventListener('change', function() {
+      const selectedTheme = this.value;
+      document.documentElement.setAttribute('data-theme', selectedTheme);
+      localStorage.setItem('theme', selectedTheme);
+    });
+  });
+  
 // Helper function to sanitize filename
 window.sanitizeFilename = function(filename) {
     return filename

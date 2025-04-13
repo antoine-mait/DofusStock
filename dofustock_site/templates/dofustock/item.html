@@ -61,7 +61,44 @@
             <h2>Effects</h2>
             <ul>
                 {% for effect in effects %}
-                <li>{{ effect.description }}</li>
+                <li class="{% if 'Chance' in effect.description %}effect-chance
+                {% elif 'Prospection' in effect.description %}effect-prospection
+                {% elif 'Sagesse' in effect.description %}effect-wisdom
+                {% elif 'Force' in effect.description %}effect-strength
+                {% elif 'Intelligence' in effect.description %}effect-intelligence
+                {% elif 'Agilité' in effect.description %}effect-agility
+                {% elif 'Vitalité' in effect.description %}effect-vitality
+                {% elif 'Puissance' in effect.description %}effect-power
+                {% elif 'Critique' in effect.description %}effect-critical
+                {% elif 'Dommages Terre' in effect.description %}effect-strength
+                {% elif 'Dommages Feu' in effect.description %}effect-intelligence
+                {% elif 'Dommages Eau' in effect.description %}effect-chance
+                {% elif 'Dommages Air' in effect.description %}effect-agility
+                {% elif 'Dommages Neutre' in effect.description %}effect-neutral
+                {% elif 'Soins' in effect.description %}effect-soin
+                {% elif 'Résistance Terre' in effect.description %}effect-strength
+                {% elif 'Résistance Feu' in effect.description %}effect-intelligence
+                {% elif 'Résistance Eau' in effect.description %}effect-chance
+                {% elif 'Résistance Air' in effect.description %}effect-agility
+                {% elif 'Résistance Neutre' in effect.description %}effect-neutral
+                {% elif 'Résistances Terre' in effect.description %}effect-strength
+                {% elif 'Résistances Feu' in effect.description %}effect-intelligence
+                {% elif 'Résistances Eau' in effect.description %}effect-chance
+                {% elif 'Résistances Air' in effect.description %}effect-agility
+                {% elif 'Résistances Neutre' in effect.description %}effect-neutral
+                {% elif 'Tacle' in effect.description %}effect-agility
+                {% elif 'Retrait PA' in effect.description %}effect-prospection
+                {% elif 'Portée' in effect.description %}effect-prospection
+                {% elif 'Esquive PM' in effect.description %}effect-agility
+                {% elif 'Fuite' in effect.description %}effect-agility
+                {% elif 'PM' in effect.description %}effect-agility
+                {% elif 'Invocation' in effect.description %}effect-agility
+                {% elif 'Initiative' in effect.description %}effect-wisdom
+                {% else %}effect-neutral
+                {% endif %}"
+                >
+                    {{ effect.description }}
+                </li>
                 {% endfor %}
             </ul>
         </div>

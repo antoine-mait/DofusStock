@@ -1,8 +1,8 @@
 body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
-    color: #333;
-    background-color: #f4f4f4;
+    color: var(--color-text);
+    background-color: var(--color-background);
 }
 
 a, a:hover, a:active, a:focus {
@@ -10,3 +10,22 @@ a, a:hover, a:active, a:focus {
     text-decoration: none;
     outline: none;
 }
+.theme-selector {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+  }
+  
+  .theme-selector select {
+    padding: 5px 10px;
+    border-radius: 4px;
+    background-color: var(--color-background-light);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+  }
+  
+  .theme-selector select:hover {
+    border-color: var(--color-accent-blue);
+  }

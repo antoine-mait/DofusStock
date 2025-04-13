@@ -4,20 +4,14 @@ from django.db import IntegrityError
 from django.http import HttpResponseRedirect 
 from django.shortcuts import render , redirect , get_object_or_404
 from django.urls import reverse
-from django.conf import settings
 from django.http import JsonResponse
 from .models import User , Item , Craftlist , Price
 from playwright.sync_api import sync_playwright
 import json
-import re
 from django.db.models import Case, When, IntegerField, Value
 from django.template.defaultfilters import floatformat
 
 from .utils import sanitize_filename , calculate_craft_cost , format_craft_cost
-# Create your views here.
-def index(request):
-
-    return render(request, "dofustock/index.html")
 
 def login_view(request):
     if request.method == "POST":
@@ -30,7 +24,7 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             login(request, user)
-            return HttpResponseRedirect(reverse("index"))
+            return HttpResponseRedirect(reverse("encyclopedie"))
         else:
             return render(request, "dofustock/login.html", {
                 "message": "Invalid username and/or password."
@@ -40,7 +34,7 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return HttpResponseRedirect(reverse("index"))
+    return HttpResponseRedirect(reverse("encyclopedie"))
 
 def register(request):
     if request.method == "POST":
@@ -578,4 +572,3 @@ def toggle_craftlist(request, ankama_id):
         return JsonResponse({'error': 'Authentication required'}, status=401)
     
     return redirect("login")
-
