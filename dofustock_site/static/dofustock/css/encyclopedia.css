@@ -21,6 +21,7 @@
     cursor: pointer;
     transition: background-color 0.3s, transform 0.2s;
     box-shadow: -2px 2px 5px var(--shadow-dark);
+    color: var( --color-text);
 }
 .category-button:hover, .item-type-button:hover {
     background-color: var(--color-button-hover);
@@ -44,9 +45,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    border-radius: 5px;
     justify-content: space-between;
     height: 100%;
-    background-color: var(--color-card-bg);
+    background-color: var( --color-background-light);
     transition: box-shadow 0.3s, transform 0.3s;
     box-shadow: -4px 4px 10px var(--shadow-light);
 }

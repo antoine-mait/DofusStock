@@ -129,7 +129,7 @@ async function displayExtractedItems(items) {
                                 onerror="this.src='${window.FALLBACK_IMAGE}'; this.onerror=null;">
                             
                             <!-- Item Name Column -->
-                            <a href="/item/${item.ankama_id}/" class="item-link">${itemName}</a>
+                            <a href="/item/${item.ankama_id}/" class="item-link"> ${itemName}</a>
                             
                             <!-- Button Column (Aligned to Right) -->
                             <div>

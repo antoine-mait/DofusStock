@@ -45,15 +45,15 @@
  --color-text: #e0e0e0;
  --color-text-secondary: #a0a0a0;
  --color-text-heading: #ffffff;
- --color-text-mid:#333333;
- --color-background: #1c1c1c;
- --color-background-light: #2a2a2a;
- --color-background-lighter: #333333;
+ --color-text-mid:#e0e0e0;
+ --color-background: #2E2924;
+ --color-background-light: #3C3630;
+ --color-background-lighter: #3C3630;
  --color-navbar: #67a84d;
- --color-card-bg: #2d2d2d;
- --color-button-bg: #67a84d;
- --color-button-hover: #5a9440;
- --color-border: #444444;
+ --color-card-bg: #2E2924;
+ --color-button-bg: #3C3630;
+ --color-button-hover: #312c27;
+ --color-border: #524941;
  --color-border-light: #555555; 
  --color-table-header: #333333;
  

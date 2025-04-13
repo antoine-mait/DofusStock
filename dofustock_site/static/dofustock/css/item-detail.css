@@ -91,7 +91,7 @@
 }
 
 .item-recipes th {
-    background-color: var(--color-table-header);
+    background-color: var( --color-background);
     text-align: center;
     font-weight: bold;
 }

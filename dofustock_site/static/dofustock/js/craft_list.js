@@ -47,17 +47,16 @@ function createCraftListItemCard(item) {
                                 alt="${item.name}" class="item_img"
                                 onerror="this.src='/media/IMG/equipment/Outil/489-Loupe.png'; this.onerror=null;">
                         </div>
-                        <h5 class="card-title mb-0 flex-grow-1">${item.name}</h5>
+                        <h5 class="card-title mb-0 flex-grow-1">
+                            <a href="/item/${item.ankama_id}/" class="item-link"> ${itemName}</a>
+                        </h5>
                         <div class="button-actions d-flex">
                             <button type="button" 
                                     class="btn btn-sm remove-from-craft-list" 
                                     data-item-id="${item.ankama_id}">
                                 <img class="trash icon-small" src="/media/Icon/trash.png" alt="delete">
                             </button>
-                            <a href="/item/${item.ankama_id}/" 
-                            class="btn btn-sm">
-                                <img class="info icon-small" src="/media/Icon/info.png" alt="details">
-                            </a>
+                            
                         </div>
                     </div>
                     

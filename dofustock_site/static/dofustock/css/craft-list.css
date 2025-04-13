@@ -13,6 +13,7 @@ span {
     box-shadow: -4px 4px 10px var(--shadow-light);
     margin-bottom: 0px;
     height: 100%;
+    background-color: var(--color-background-light);
 }
 
 /* Layout containers */
@@ -59,6 +60,7 @@ span {
     gap: 20px;
     margin-bottom: 0px;
     grid-template-columns: 1fr;
+    
 }
 
 /* Item styling */
@@ -76,6 +78,7 @@ span {
     border-radius: 5px;
     border: 1px solid var(--color-border);
     box-shadow: 0 0 15px var(--shadow-medium);
+    background-color: var(--color-background-lighter)
 }
 
 .card-title {
@@ -88,6 +91,15 @@ span {
     white-space: nowrap;
     min-width: 0;
     margin-right: 10px;
+    justify-content: center;
+    align-items: center;    
+}
+
+.item-link{
+    display: flex;
+    text-align: center; 
+    justify-content: center;
+    align-items: center;
 }
 
 .card-text {
@@ -117,15 +129,14 @@ span {
 }
 
 .btn-sm:hover {
-    background-color: var(--color-button-hover);
+    background-color: var(--color-background-lighter);
     border-radius: 4px;
 }
-
 .add-to-craftlist-btn {
     min-width: 20px;
 }
 h5{
-    color : var(--color-text-mid)
+    color : var(--color-text-mid);
 }
 /* Item container */
 .item-container {
@@ -135,7 +146,7 @@ h5{
     width: 100%;
     border: 1px solid var(--color-border-light);
     border-radius: 4px;
-    background-color: var(--color-background-light);
+    background-color: var(--color-background-lighter)
 }
 
 .items-grid {
@@ -143,6 +154,7 @@ h5{
     grid-template-columns: repeat(2, 1fr);
     gap: 15px;
     width: 100%;
+    
 }
 
 /* Item metadata section */
@@ -150,6 +162,7 @@ h5{
     padding: 5px 0;
     border-top: 1px solid var(--color-border-light);
     border-bottom: 1px solid var(--color-border-light);
+    
 }
 .item-metadata.mb-3 {
     margin-bottom: 0.5rem !important; /* Reduce from 1rem (mb-3) */
@@ -179,7 +192,8 @@ h5{
     width: 100%;
     border-collapse: collapse;
     margin-top: -10px;
-    color : var(--color-text-mid)
+    color : var(--color-text-mid);
+    background-color: var(--color-background-lighter);
 }
 
 .item-recipes th, 
@@ -195,7 +209,7 @@ h5{
 
 .item-recipes th, 
 .resources-section th {
-    background-color: var(--color-table-header);
+    background-color: var(--color-background-light);
     color : var(--color-text-heading);
 }
 
@@ -260,6 +274,7 @@ h5{
     color: var(--color-alert-info-text);
     padding: 15px;
     border-radius: 4px;
+    background-color: var(--color-background-lighter)
 }
 
 #loading {
@@ -302,13 +317,17 @@ h5{
 
 .d-flex.align-items-center.mb-3 {
     flex-wrap: wrap;
-    align-items: flex-start !important;
+    align-items: center !important;
     margin-bottom: 0.5rem !important;
 }
 
 h3 .price-better, h3 .price-worse {
     font-weight: normal;
 }
+
+.btn-success {
+    background-color: var( --color-navbar) !important; 
+  }
 
 /* Media Queries - All consolidated at the end */
 @media (max-width: 576px) {

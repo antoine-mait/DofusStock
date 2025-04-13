@@ -79,7 +79,9 @@
                                 </div>
                                 
                                 <!-- Item Name -->
-                                <h5 class="card-title mb-0 flex-grow-1">{{ item.name }}</h5>
+                                <h5 class="card-title mb-0 flex-grow-1">
+                                    <a href="/item/{{item.ankama_id}}/" class="item-link">{{ item.name }}</a>
+                                </h5>
                                 
                                 <!-- Action Buttons -->
                                 <div class="button-actions d-flex">
@@ -89,10 +91,7 @@
                                             data-item-id="{{ item.ankama_id }}">
                                         <img class="trash icon-small" src="/media/Icon/trash.png" alt="delete">
                                     </button>
-                                    <a href="{% url 'item_detail' item.ankama_id %}" 
-                                    class="btn btn-sm">
-                                        <img class="info icon-small" src="/media/Icon/info.png" alt="details">
-                                    </a>
+                                   
                                 </div>
                             </div>
                             
