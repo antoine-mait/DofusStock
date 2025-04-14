@@ -5,7 +5,6 @@ import time
 import logging
 import requests
 import unicodedata
-import concurrent.futures
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from dotenv import load_dotenv
