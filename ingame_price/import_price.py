@@ -203,7 +203,7 @@ def import_prices_from_csv(csv_file_path, num_workers=4):
     
     print(f"Import completed. Processed {total_rows} rows, matched {matched_items} items, {missing_items} missing items, {error_items} errors.")
 
-if __name__ == "__main__":
+def main():
     overall_start = time.time()
     
     csv_file_path = os.path.join(tmp_folder, 'ALL_HDV_Prices.csv')
@@ -217,3 +217,6 @@ if __name__ == "__main__":
     import_prices_from_csv(csv_file_path, num_workers=recommended_workers)
     
     print(f"Total processing time: {time.time() - overall_start:.2f} seconds")
+
+if __name__ == "__main__":
+    main()
