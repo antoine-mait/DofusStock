@@ -6,6 +6,7 @@
 }
 /* Add these new styles */
 .navbar {
+    position: relative;
     width: 100%;
     justify-content: center;
 }

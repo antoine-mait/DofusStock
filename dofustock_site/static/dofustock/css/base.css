@@ -11,7 +11,7 @@ a, a:hover, a:active, a:focus {
     outline: none;
 }
 .theme-selector {
-    position: fixed;
+  position: absolute;
     top: 20px;
     right: 20px;
     z-index: 1000;
