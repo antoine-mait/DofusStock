@@ -29,3 +29,8 @@ a, a:hover, a:active, a:focus {
   .theme-selector select:hover {
     border-color: var(--color-accent-blue);
   }
+
+.form-group , .log{
+  width: 30%;
+  padding-left: 15px;
+}
