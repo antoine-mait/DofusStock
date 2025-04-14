@@ -173,7 +173,7 @@ async function displayExtractedItems(items) {
                 const result = await window.toggleCraftlistItem(itemId);
                 if (result.status === 'added') {
                     // Update button state
-                    this.textContent = Math.sign(3);
+                    window.location.reload();
                     this.disabled = true;
                     this.classList.remove('btn-primary');
                     this.classList.add('btn-success');
