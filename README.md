@@ -66,32 +66,38 @@ The complexity is evident in:
    pip install -r requirements.txt
    ```
 
-4. Set up the database:
+4. Create Django base settings.py in dofustock_project folder and add the installed_apps.
+
+5. Create urls.py in the same folder and link the views to a path. 
+
+6. Set up the database:
    ```bash
    python manage.py migrate
    ```
 
-5. Populate the database with the Api:
+7.  Create the website.sqlite3 in the main folder
+
+8. Populate the database with the Api:
    ```bash
    python api_data_fetch.py 
    ```
 
-6. Open the game on the correct game map and start the scraping process:
+9. Open the game on the correct game map and start the scraping process:
    ```bash
    python main.py 
    ```
 
-7. Create a superuser account:
+10. Create a superuser account:
    ```bash
    python manage.py createsuperuser
    ```
 
-8. Run the development server:
+11.  Run the development server:
    ```bash
    python manage.py runserver
    ```
 
-9. Access the application at http://127.0.0.1:8000/
+12. Access the application at http://127.0.0.1:8000/
 
 ## Additional Information
 
