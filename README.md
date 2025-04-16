@@ -14,7 +14,7 @@ This project is distinct from other course projects in several ways:
 
 4. **Real-time Economic Analysis**: The app calculates optimal crafting decisions by comparing market prices against crafting costs, requiring complex algorithms to determine resource requirements and total expenses.
 
-5. **External Web Scraping**: The application can extract item information from Dofus build websites using Playwright, providing a unique integration with the game's ecosystem.
+5. **External Web Scraping**: The application can extract item information from the popular Dofusbook websites using Playwright, providing a unique integration with the game's ecosystem.
 
 6. **Asynchronous Processing**: The application uses multithreading and multiprocessing for performance-critical operations, enabling efficient processing of large datasets.
 
@@ -39,7 +39,7 @@ The complexity is evident in:
 
 ### Data Collection Systems
 - `api-fetcher folder`
-  - `api_data_fetch.py`: Connects to the Dofus API to fetch comprehensive item data, downloads item images, and populates the database with items, effects, and recipes.
+  - `api_data_fetch.py`: Connects to the DofusDude API to fetch comprehensive item data, downloads item images, and populates the database with items, effects, and recipes.
 
 - `ingame-price folder`
   - `main.py`: Coordinates the complete HDV price scraping pipeline.
@@ -154,7 +154,8 @@ See `requirements.txt` for the complete list of Python packages needed to run th
 - Solution: Manually check "missing.csv" , compare with ingame item name , and add the wrong name with his correction ,
   in the correction.py : 
   ```bash
-  correction_dict = {"ostrale":"astrale"}
+  correction_dict = {"ostrale":"astrale"} 
+      # This is an example, more than 300 correction were needed on my side
   ```
 
 ## Resolution and Display Problems
