@@ -14,7 +14,7 @@ This project is distinct from other course projects in several ways:
 
 4. **Real-time Economic Analysis**: The app calculates optimal crafting decisions by comparing market prices against crafting costs, requiring complex algorithms to determine resource requirements and total expenses.
 
-5. **External Web Scraping**: The application can extract item information from the popular Dofusbook websites using Playwright, providing a unique integration with the game's ecosystem.
+5. **External Web Scraping**: The application can extract item information from the popular Dofusbook websites using Playwright, providing a unique use for the players.
 
 6. **Asynchronous Processing**: The application uses multithreading and multiprocessing for performance-critical operations, enabling efficient processing of large datasets.
 
